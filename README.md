@@ -8,7 +8,7 @@ is useful for workflows that need metadata about the repository.
 - Fetches the latest release information (ID, name, tag, date).
 - Retrieves the latest and previous Git tags.
 - Detects if the repository is a monorepo.
-- Scans for projects within the repository and determines if they are Docker apps or NPM packages.
+- Scans for packages within the repository and determines if they are Docker apps or NPM packages.
 - Outputs repository details for use in GitHub Actions workflows.
 
 ## 📌 Inputs
@@ -33,7 +33,7 @@ is useful for workflows that need metadata about the repository.
 | `releaseName`    | Name of the latest release                          |
 | `releaseTag`     | Tag of the latest release                           |
 | `releaseDate`    | Date of the latest release                          |
-| `projects`       | JSON string of detected packages                    |
+| `packages`       | JSON string of detected packages                    |
 | `dockerPackages` | Number of detected Docker packages                  |
 | `npmPackages`    | Number of detected NPM packages                     |
 
