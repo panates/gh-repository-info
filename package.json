@@ -1,7 +1,7 @@
 {
   "name": "gh-repository-info",
   "description": "A GitHub Action to collect information from repository",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "author": {
     "name": "Panates",
