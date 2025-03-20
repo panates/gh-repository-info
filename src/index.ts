@@ -63,7 +63,7 @@ async function run() {
   core.setOutput('releaseName', output.releaseName || '');
   core.setOutput('releaseTag', output.releaseTag || '');
   core.setOutput('releaseDate', output.releaseDate || '');
-  core.setOutput('projects', JSON.stringify(output.packages));
+  core.setOutput('packages', JSON.stringify(output.packages));
   core.setOutput('dockerPackages', dockerPackages);
   core.setOutput('npmPackages', npmPackages);
 
