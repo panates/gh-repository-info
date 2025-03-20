@@ -1,0 +1,36 @@
+name: 'Version Info'
+description: 'Retrieve version tags and releases info from your repository.'
+author: 'Eray Hanoglu <e.hanoglu@panates.com>'
+inputs:
+  token:
+    description: 'GitHub Access Token'
+    required: false
+    default: ${{ github.token }}
+outputs:
+  lastVersion:
+    description: Last version tag name
+  lastSha:
+    description: Last version sha
+  prevVersion:
+    description: Previous version tag name
+  prevSha:
+    description: Previous version sha
+  releasedVersion:
+    description: Last released version tag name
+  releasedSha:
+    description: Last released version sha
+  needRelease:
+    description: true if last sha differs from released sha, false otherwise
+  last:
+    description: Info object for last version
+  previous:
+    description: Info object for previous version
+  released:
+    description: Info object for last released version
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+branding:
+  color: yellow
+  icon: tag
