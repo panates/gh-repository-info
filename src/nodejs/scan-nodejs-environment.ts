@@ -1,4 +1,3 @@
-import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import glob from 'fast-glob';
@@ -6,6 +5,7 @@ import {
   PackageInfo,
   RepositoryInfo,
 } from '../interfaces/repository-info.interface.js';
+import { npmExists } from './check-npm.js';
 import { processTsConfig } from './read-tsconfig.js';
 
 export async function scanNodeJSEnvironment(
@@ -69,17 +69,11 @@ async function scanProject(
 
   /** Check published version from npm repository */
   if (project.isNpmPackage) {
-    project.npmPublishedVersion = await fetchVersionFromNpm(project.name);
+    project.npmPublishedVersion = await npmExists(
+      project.name,
+      '',
+      pkgJson.publishConfig?.registry,
+    );
   }
   return project;
-}
-
-export async function fetchVersionFromNpm(packageName: string) {
-  try {
-    return execSync('npm show "' + packageName + '" version')
-      .toString()
-      .trim();
-  } catch (error) {
-    console.error('Error fetching version from npm repository:', error);
-  }
 }

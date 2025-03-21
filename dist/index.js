@@ -39144,14 +39144,34 @@ var core = __nccwpck_require__(7484);
 var github = __nccwpck_require__(3228);
 // EXTERNAL MODULE: ./node_modules/ansi-colors/index.js
 var ansi_colors = __nccwpck_require__(4801);
-;// CONCATENATED MODULE: external "node:child_process"
-const external_node_child_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:child_process");
 ;// CONCATENATED MODULE: external "node:fs"
 const external_node_fs_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:fs");
 ;// CONCATENATED MODULE: external "node:path"
 const external_node_path_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:path");
 // EXTERNAL MODULE: ./node_modules/fast-glob/out/index.js
 var out = __nccwpck_require__(5648);
+;// CONCATENATED MODULE: ./build/nodejs/check-npm.js
+async function npmExists(packageName, version, registry) {
+    registry = registry || 'https://registry.npmjs.org';
+    while (registry.endsWith('/')) {
+        registry = registry.slice(0, -1);
+    }
+    const registryUrl = `${registry}/${packageName}}` + (version ? `/${version}` : '');
+    const response = await fetch(registryUrl, {
+        method: 'GET',
+    });
+    if (response.status === 200) {
+        const packageData = await response.json();
+        return packageData.version;
+    }
+    else if (response.status === 404) {
+        return '';
+    }
+    else {
+        throw new Error(`Unexpected status code: ${response.status}`);
+    }
+}
+//# sourceMappingURL=check-npm.js.map
 ;// CONCATENATED MODULE: external "node:module"
 const external_node_module_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:module");
 ;// CONCATENATED MODULE: ./build/nodejs/read-tsconfig.js
@@ -39293,19 +39313,9 @@ async function scanProject(rootDir, dir) {
     }
     /** Check published version from npm repository */
     if (project.isNpmPackage) {
-        project.npmPublishedVersion = await fetchVersionFromNpm(project.name);
+        project.npmPublishedVersion = await npmExists(project.name, '', pkgJson.publishConfig?.registry);
     }
     return project;
-}
-async function fetchVersionFromNpm(packageName) {
-    try {
-        return (0,external_node_child_process_namespaceObject.execSync)('npm show "' + packageName + '" version')
-            .toString()
-            .trim();
-    }
-    catch (error) {
-        console.error('Error fetching version from npm repository:', error);
-    }
 }
 //# sourceMappingURL=scan-nodejs-environment.js.map
 ;// CONCATENATED MODULE: ./build/scan-environment.js
