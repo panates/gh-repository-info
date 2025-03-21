@@ -8011,6 +8011,1869 @@ var request = withDefaults(import_endpoint.endpoint, {
 
 /***/ }),
 
+/***/ 4639:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.envReplace = void 0;
+const ENV_EXPR = /(?<!\\)(\\*)\$\{([^${}]+)\}/g;
+function envReplace(settingValue, env) {
+    return settingValue.replace(ENV_EXPR, replaceEnvMatch.bind(null, env));
+}
+exports.envReplace = envReplace;
+function replaceEnvMatch(env, orig, escape, name) {
+    if (escape.length % 2) {
+        return orig.slice((escape.length + 1) / 2);
+    }
+    const envValue = getEnvValue(env, name);
+    if (envValue === undefined) {
+        throw new Error(`Failed to replace env in config: ${orig}`);
+    }
+    return `${(escape.slice(escape.length / 2))}${envValue}`;
+}
+const ENV_VALUE = /([^:-]+)(:?)-(.+)/;
+function getEnvValue(env, name) {
+    const matched = name.match(ENV_VALUE);
+    if (!matched)
+        return env[name];
+    const [, variableName, colon, fallback] = matched;
+    if (Object.prototype.hasOwnProperty.call(env, variableName)) {
+        return !env[variableName] && colon ? fallback : env[variableName];
+    }
+    return fallback;
+}
+//# sourceMappingURL=env-replace.js.map
+
+/***/ }),
+
+/***/ 1297:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.envReplace = void 0;
+var env_replace_1 = __nccwpck_require__(4639);
+Object.defineProperty(exports, "envReplace", ({ enumerable: true, get: function () { return env_replace_1.envReplace; } }));
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ 4929:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.readCAFileSync = void 0;
+const graceful_fs_1 = __importDefault(__nccwpck_require__(6149));
+function readCAFileSync(filePath) {
+    try {
+        const contents = graceful_fs_1.default.readFileSync(filePath, 'utf8');
+        const delim = '-----END CERTIFICATE-----';
+        const output = contents
+            .split(delim)
+            .filter((ca) => Boolean(ca.trim()))
+            .map((ca) => `${ca.trimLeft()}${delim}`);
+        return output;
+    }
+    catch (err) {
+        if (err.code === 'ENOENT')
+            return undefined;
+        throw err;
+    }
+}
+exports.readCAFileSync = readCAFileSync;
+//# sourceMappingURL=ca-file.js.map
+
+/***/ }),
+
+/***/ 1572:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__nccwpck_require__(4929), exports);
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ 661:
+/***/ ((module) => {
+
+
+
+module.exports = clone
+
+var getPrototypeOf = Object.getPrototypeOf || function (obj) {
+  return obj.__proto__
+}
+
+function clone (obj) {
+  if (obj === null || typeof obj !== 'object')
+    return obj
+
+  if (obj instanceof Object)
+    var copy = { __proto__: getPrototypeOf(obj) }
+  else
+    var copy = Object.create(null)
+
+  Object.getOwnPropertyNames(obj).forEach(function (key) {
+    Object.defineProperty(copy, key, Object.getOwnPropertyDescriptor(obj, key))
+  })
+
+  return copy
+}
+
+
+/***/ }),
+
+/***/ 6149:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+var fs = __nccwpck_require__(9896)
+var polyfills = __nccwpck_require__(1148)
+var legacy = __nccwpck_require__(113)
+var clone = __nccwpck_require__(661)
+
+var util = __nccwpck_require__(9023)
+
+/* istanbul ignore next - node 0.x polyfill */
+var gracefulQueue
+var previousSymbol
+
+/* istanbul ignore else - node 0.x polyfill */
+if (typeof Symbol === 'function' && typeof Symbol.for === 'function') {
+  gracefulQueue = Symbol.for('graceful-fs.queue')
+  // This is used in testing by future versions
+  previousSymbol = Symbol.for('graceful-fs.previous')
+} else {
+  gracefulQueue = '___graceful-fs.queue'
+  previousSymbol = '___graceful-fs.previous'
+}
+
+function noop () {}
+
+function publishQueue(context, queue) {
+  Object.defineProperty(context, gracefulQueue, {
+    get: function() {
+      return queue
+    }
+  })
+}
+
+var debug = noop
+if (util.debuglog)
+  debug = util.debuglog('gfs4')
+else if (/\bgfs4\b/i.test(process.env.NODE_DEBUG || ''))
+  debug = function() {
+    var m = util.format.apply(util, arguments)
+    m = 'GFS4: ' + m.split(/\n/).join('\nGFS4: ')
+    console.error(m)
+  }
+
+// Once time initialization
+if (!fs[gracefulQueue]) {
+  // This queue can be shared by multiple loaded instances
+  var queue = global[gracefulQueue] || []
+  publishQueue(fs, queue)
+
+  // Patch fs.close/closeSync to shared queue version, because we need
+  // to retry() whenever a close happens *anywhere* in the program.
+  // This is essential when multiple graceful-fs instances are
+  // in play at the same time.
+  fs.close = (function (fs$close) {
+    function close (fd, cb) {
+      return fs$close.call(fs, fd, function (err) {
+        // This function uses the graceful-fs shared queue
+        if (!err) {
+          resetQueue()
+        }
+
+        if (typeof cb === 'function')
+          cb.apply(this, arguments)
+      })
+    }
+
+    Object.defineProperty(close, previousSymbol, {
+      value: fs$close
+    })
+    return close
+  })(fs.close)
+
+  fs.closeSync = (function (fs$closeSync) {
+    function closeSync (fd) {
+      // This function uses the graceful-fs shared queue
+      fs$closeSync.apply(fs, arguments)
+      resetQueue()
+    }
+
+    Object.defineProperty(closeSync, previousSymbol, {
+      value: fs$closeSync
+    })
+    return closeSync
+  })(fs.closeSync)
+
+  if (/\bgfs4\b/i.test(process.env.NODE_DEBUG || '')) {
+    process.on('exit', function() {
+      debug(fs[gracefulQueue])
+      __nccwpck_require__(2613).equal(fs[gracefulQueue].length, 0)
+    })
+  }
+}
+
+if (!global[gracefulQueue]) {
+  publishQueue(global, fs[gracefulQueue]);
+}
+
+module.exports = patch(clone(fs))
+if (process.env.TEST_GRACEFUL_FS_GLOBAL_PATCH && !fs.__patched) {
+    module.exports = patch(fs)
+    fs.__patched = true;
+}
+
+function patch (fs) {
+  // Everything that references the open() function needs to be in here
+  polyfills(fs)
+  fs.gracefulify = patch
+
+  fs.createReadStream = createReadStream
+  fs.createWriteStream = createWriteStream
+  var fs$readFile = fs.readFile
+  fs.readFile = readFile
+  function readFile (path, options, cb) {
+    if (typeof options === 'function')
+      cb = options, options = null
+
+    return go$readFile(path, options, cb)
+
+    function go$readFile (path, options, cb, startTime) {
+      return fs$readFile(path, options, function (err) {
+        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
+          enqueue([go$readFile, [path, options, cb], err, startTime || Date.now(), Date.now()])
+        else {
+          if (typeof cb === 'function')
+            cb.apply(this, arguments)
+        }
+      })
+    }
+  }
+
+  var fs$writeFile = fs.writeFile
+  fs.writeFile = writeFile
+  function writeFile (path, data, options, cb) {
+    if (typeof options === 'function')
+      cb = options, options = null
+
+    return go$writeFile(path, data, options, cb)
+
+    function go$writeFile (path, data, options, cb, startTime) {
+      return fs$writeFile(path, data, options, function (err) {
+        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
+          enqueue([go$writeFile, [path, data, options, cb], err, startTime || Date.now(), Date.now()])
+        else {
+          if (typeof cb === 'function')
+            cb.apply(this, arguments)
+        }
+      })
+    }
+  }
+
+  var fs$appendFile = fs.appendFile
+  if (fs$appendFile)
+    fs.appendFile = appendFile
+  function appendFile (path, data, options, cb) {
+    if (typeof options === 'function')
+      cb = options, options = null
+
+    return go$appendFile(path, data, options, cb)
+
+    function go$appendFile (path, data, options, cb, startTime) {
+      return fs$appendFile(path, data, options, function (err) {
+        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
+          enqueue([go$appendFile, [path, data, options, cb], err, startTime || Date.now(), Date.now()])
+        else {
+          if (typeof cb === 'function')
+            cb.apply(this, arguments)
+        }
+      })
+    }
+  }
+
+  var fs$copyFile = fs.copyFile
+  if (fs$copyFile)
+    fs.copyFile = copyFile
+  function copyFile (src, dest, flags, cb) {
+    if (typeof flags === 'function') {
+      cb = flags
+      flags = 0
+    }
+    return go$copyFile(src, dest, flags, cb)
+
+    function go$copyFile (src, dest, flags, cb, startTime) {
+      return fs$copyFile(src, dest, flags, function (err) {
+        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
+          enqueue([go$copyFile, [src, dest, flags, cb], err, startTime || Date.now(), Date.now()])
+        else {
+          if (typeof cb === 'function')
+            cb.apply(this, arguments)
+        }
+      })
+    }
+  }
+
+  var fs$readdir = fs.readdir
+  fs.readdir = readdir
+  var noReaddirOptionVersions = /^v[0-5]\./
+  function readdir (path, options, cb) {
+    if (typeof options === 'function')
+      cb = options, options = null
+
+    var go$readdir = noReaddirOptionVersions.test(process.version)
+      ? function go$readdir (path, options, cb, startTime) {
+        return fs$readdir(path, fs$readdirCallback(
+          path, options, cb, startTime
+        ))
+      }
+      : function go$readdir (path, options, cb, startTime) {
+        return fs$readdir(path, options, fs$readdirCallback(
+          path, options, cb, startTime
+        ))
+      }
+
+    return go$readdir(path, options, cb)
+
+    function fs$readdirCallback (path, options, cb, startTime) {
+      return function (err, files) {
+        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
+          enqueue([
+            go$readdir,
+            [path, options, cb],
+            err,
+            startTime || Date.now(),
+            Date.now()
+          ])
+        else {
+          if (files && files.sort)
+            files.sort()
+
+          if (typeof cb === 'function')
+            cb.call(this, err, files)
+        }
+      }
+    }
+  }
+
+  if (process.version.substr(0, 4) === 'v0.8') {
+    var legStreams = legacy(fs)
+    ReadStream = legStreams.ReadStream
+    WriteStream = legStreams.WriteStream
+  }
+
+  var fs$ReadStream = fs.ReadStream
+  if (fs$ReadStream) {
+    ReadStream.prototype = Object.create(fs$ReadStream.prototype)
+    ReadStream.prototype.open = ReadStream$open
+  }
+
+  var fs$WriteStream = fs.WriteStream
+  if (fs$WriteStream) {
+    WriteStream.prototype = Object.create(fs$WriteStream.prototype)
+    WriteStream.prototype.open = WriteStream$open
+  }
+
+  Object.defineProperty(fs, 'ReadStream', {
+    get: function () {
+      return ReadStream
+    },
+    set: function (val) {
+      ReadStream = val
+    },
+    enumerable: true,
+    configurable: true
+  })
+  Object.defineProperty(fs, 'WriteStream', {
+    get: function () {
+      return WriteStream
+    },
+    set: function (val) {
+      WriteStream = val
+    },
+    enumerable: true,
+    configurable: true
+  })
+
+  // legacy names
+  var FileReadStream = ReadStream
+  Object.defineProperty(fs, 'FileReadStream', {
+    get: function () {
+      return FileReadStream
+    },
+    set: function (val) {
+      FileReadStream = val
+    },
+    enumerable: true,
+    configurable: true
+  })
+  var FileWriteStream = WriteStream
+  Object.defineProperty(fs, 'FileWriteStream', {
+    get: function () {
+      return FileWriteStream
+    },
+    set: function (val) {
+      FileWriteStream = val
+    },
+    enumerable: true,
+    configurable: true
+  })
+
+  function ReadStream (path, options) {
+    if (this instanceof ReadStream)
+      return fs$ReadStream.apply(this, arguments), this
+    else
+      return ReadStream.apply(Object.create(ReadStream.prototype), arguments)
+  }
+
+  function ReadStream$open () {
+    var that = this
+    open(that.path, that.flags, that.mode, function (err, fd) {
+      if (err) {
+        if (that.autoClose)
+          that.destroy()
+
+        that.emit('error', err)
+      } else {
+        that.fd = fd
+        that.emit('open', fd)
+        that.read()
+      }
+    })
+  }
+
+  function WriteStream (path, options) {
+    if (this instanceof WriteStream)
+      return fs$WriteStream.apply(this, arguments), this
+    else
+      return WriteStream.apply(Object.create(WriteStream.prototype), arguments)
+  }
+
+  function WriteStream$open () {
+    var that = this
+    open(that.path, that.flags, that.mode, function (err, fd) {
+      if (err) {
+        that.destroy()
+        that.emit('error', err)
+      } else {
+        that.fd = fd
+        that.emit('open', fd)
+      }
+    })
+  }
+
+  function createReadStream (path, options) {
+    return new fs.ReadStream(path, options)
+  }
+
+  function createWriteStream (path, options) {
+    return new fs.WriteStream(path, options)
+  }
+
+  var fs$open = fs.open
+  fs.open = open
+  function open (path, flags, mode, cb) {
+    if (typeof mode === 'function')
+      cb = mode, mode = null
+
+    return go$open(path, flags, mode, cb)
+
+    function go$open (path, flags, mode, cb, startTime) {
+      return fs$open(path, flags, mode, function (err, fd) {
+        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
+          enqueue([go$open, [path, flags, mode, cb], err, startTime || Date.now(), Date.now()])
+        else {
+          if (typeof cb === 'function')
+            cb.apply(this, arguments)
+        }
+      })
+    }
+  }
+
+  return fs
+}
+
+function enqueue (elem) {
+  debug('ENQUEUE', elem[0].name, elem[1])
+  fs[gracefulQueue].push(elem)
+  retry()
+}
+
+// keep track of the timeout between retry() calls
+var retryTimer
+
+// reset the startTime and lastTime to now
+// this resets the start of the 60 second overall timeout as well as the
+// delay between attempts so that we'll retry these jobs sooner
+function resetQueue () {
+  var now = Date.now()
+  for (var i = 0; i < fs[gracefulQueue].length; ++i) {
+    // entries that are only a length of 2 are from an older version, don't
+    // bother modifying those since they'll be retried anyway.
+    if (fs[gracefulQueue][i].length > 2) {
+      fs[gracefulQueue][i][3] = now // startTime
+      fs[gracefulQueue][i][4] = now // lastTime
+    }
+  }
+  // call retry to make sure we're actively processing the queue
+  retry()
+}
+
+function retry () {
+  // clear the timer and remove it to help prevent unintended concurrency
+  clearTimeout(retryTimer)
+  retryTimer = undefined
+
+  if (fs[gracefulQueue].length === 0)
+    return
+
+  var elem = fs[gracefulQueue].shift()
+  var fn = elem[0]
+  var args = elem[1]
+  // these items may be unset if they were added by an older graceful-fs
+  var err = elem[2]
+  var startTime = elem[3]
+  var lastTime = elem[4]
+
+  // if we don't have a startTime we have no way of knowing if we've waited
+  // long enough, so go ahead and retry this item now
+  if (startTime === undefined) {
+    debug('RETRY', fn.name, args)
+    fn.apply(null, args)
+  } else if (Date.now() - startTime >= 60000) {
+    // it's been more than 60 seconds total, bail now
+    debug('TIMEOUT', fn.name, args)
+    var cb = args.pop()
+    if (typeof cb === 'function')
+      cb.call(null, err)
+  } else {
+    // the amount of time between the last attempt and right now
+    var sinceAttempt = Date.now() - lastTime
+    // the amount of time between when we first tried, and when we last tried
+    // rounded up to at least 1
+    var sinceStart = Math.max(lastTime - startTime, 1)
+    // backoff. wait longer than the total time we've been retrying, but only
+    // up to a maximum of 100ms
+    var desiredDelay = Math.min(sinceStart * 1.2, 100)
+    // it's been long enough since the last retry, do it again
+    if (sinceAttempt >= desiredDelay) {
+      debug('RETRY', fn.name, args)
+      fn.apply(null, args.concat([startTime]))
+    } else {
+      // if we can't do this job yet, push it to the end of the queue
+      // and let the next iteration check again
+      fs[gracefulQueue].push(elem)
+    }
+  }
+
+  // schedule our next run if one isn't already scheduled
+  if (retryTimer === undefined) {
+    retryTimer = setTimeout(retry, 0)
+  }
+}
+
+
+/***/ }),
+
+/***/ 113:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+var Stream = (__nccwpck_require__(2203).Stream)
+
+module.exports = legacy
+
+function legacy (fs) {
+  return {
+    ReadStream: ReadStream,
+    WriteStream: WriteStream
+  }
+
+  function ReadStream (path, options) {
+    if (!(this instanceof ReadStream)) return new ReadStream(path, options);
+
+    Stream.call(this);
+
+    var self = this;
+
+    this.path = path;
+    this.fd = null;
+    this.readable = true;
+    this.paused = false;
+
+    this.flags = 'r';
+    this.mode = 438; /*=0666*/
+    this.bufferSize = 64 * 1024;
+
+    options = options || {};
+
+    // Mixin options into this
+    var keys = Object.keys(options);
+    for (var index = 0, length = keys.length; index < length; index++) {
+      var key = keys[index];
+      this[key] = options[key];
+    }
+
+    if (this.encoding) this.setEncoding(this.encoding);
+
+    if (this.start !== undefined) {
+      if ('number' !== typeof this.start) {
+        throw TypeError('start must be a Number');
+      }
+      if (this.end === undefined) {
+        this.end = Infinity;
+      } else if ('number' !== typeof this.end) {
+        throw TypeError('end must be a Number');
+      }
+
+      if (this.start > this.end) {
+        throw new Error('start must be <= end');
+      }
+
+      this.pos = this.start;
+    }
+
+    if (this.fd !== null) {
+      process.nextTick(function() {
+        self._read();
+      });
+      return;
+    }
+
+    fs.open(this.path, this.flags, this.mode, function (err, fd) {
+      if (err) {
+        self.emit('error', err);
+        self.readable = false;
+        return;
+      }
+
+      self.fd = fd;
+      self.emit('open', fd);
+      self._read();
+    })
+  }
+
+  function WriteStream (path, options) {
+    if (!(this instanceof WriteStream)) return new WriteStream(path, options);
+
+    Stream.call(this);
+
+    this.path = path;
+    this.fd = null;
+    this.writable = true;
+
+    this.flags = 'w';
+    this.encoding = 'binary';
+    this.mode = 438; /*=0666*/
+    this.bytesWritten = 0;
+
+    options = options || {};
+
+    // Mixin options into this
+    var keys = Object.keys(options);
+    for (var index = 0, length = keys.length; index < length; index++) {
+      var key = keys[index];
+      this[key] = options[key];
+    }
+
+    if (this.start !== undefined) {
+      if ('number' !== typeof this.start) {
+        throw TypeError('start must be a Number');
+      }
+      if (this.start < 0) {
+        throw new Error('start must be >= zero');
+      }
+
+      this.pos = this.start;
+    }
+
+    this.busy = false;
+    this._queue = [];
+
+    if (this.fd === null) {
+      this._open = fs.open;
+      this._queue.push([this._open, this.path, this.flags, this.mode, undefined]);
+      this.flush();
+    }
+  }
+}
+
+
+/***/ }),
+
+/***/ 1148:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+var constants = __nccwpck_require__(9140)
+
+var origCwd = process.cwd
+var cwd = null
+
+var platform = process.env.GRACEFUL_FS_PLATFORM || process.platform
+
+process.cwd = function() {
+  if (!cwd)
+    cwd = origCwd.call(process)
+  return cwd
+}
+try {
+  process.cwd()
+} catch (er) {}
+
+// This check is needed until node.js 12 is required
+if (typeof process.chdir === 'function') {
+  var chdir = process.chdir
+  process.chdir = function (d) {
+    cwd = null
+    chdir.call(process, d)
+  }
+  if (Object.setPrototypeOf) Object.setPrototypeOf(process.chdir, chdir)
+}
+
+module.exports = patch
+
+function patch (fs) {
+  // (re-)implement some things that are known busted or missing.
+
+  // lchmod, broken prior to 0.6.2
+  // back-port the fix here.
+  if (constants.hasOwnProperty('O_SYMLINK') &&
+      process.version.match(/^v0\.6\.[0-2]|^v0\.5\./)) {
+    patchLchmod(fs)
+  }
+
+  // lutimes implementation, or no-op
+  if (!fs.lutimes) {
+    patchLutimes(fs)
+  }
+
+  // https://github.com/isaacs/node-graceful-fs/issues/4
+  // Chown should not fail on einval or eperm if non-root.
+  // It should not fail on enosys ever, as this just indicates
+  // that a fs doesn't support the intended operation.
+
+  fs.chown = chownFix(fs.chown)
+  fs.fchown = chownFix(fs.fchown)
+  fs.lchown = chownFix(fs.lchown)
+
+  fs.chmod = chmodFix(fs.chmod)
+  fs.fchmod = chmodFix(fs.fchmod)
+  fs.lchmod = chmodFix(fs.lchmod)
+
+  fs.chownSync = chownFixSync(fs.chownSync)
+  fs.fchownSync = chownFixSync(fs.fchownSync)
+  fs.lchownSync = chownFixSync(fs.lchownSync)
+
+  fs.chmodSync = chmodFixSync(fs.chmodSync)
+  fs.fchmodSync = chmodFixSync(fs.fchmodSync)
+  fs.lchmodSync = chmodFixSync(fs.lchmodSync)
+
+  fs.stat = statFix(fs.stat)
+  fs.fstat = statFix(fs.fstat)
+  fs.lstat = statFix(fs.lstat)
+
+  fs.statSync = statFixSync(fs.statSync)
+  fs.fstatSync = statFixSync(fs.fstatSync)
+  fs.lstatSync = statFixSync(fs.lstatSync)
+
+  // if lchmod/lchown do not exist, then make them no-ops
+  if (fs.chmod && !fs.lchmod) {
+    fs.lchmod = function (path, mode, cb) {
+      if (cb) process.nextTick(cb)
+    }
+    fs.lchmodSync = function () {}
+  }
+  if (fs.chown && !fs.lchown) {
+    fs.lchown = function (path, uid, gid, cb) {
+      if (cb) process.nextTick(cb)
+    }
+    fs.lchownSync = function () {}
+  }
+
+  // on Windows, A/V software can lock the directory, causing this
+  // to fail with an EACCES or EPERM if the directory contains newly
+  // created files.  Try again on failure, for up to 60 seconds.
+
+  // Set the timeout this long because some Windows Anti-Virus, such as Parity
+  // bit9, may lock files for up to a minute, causing npm package install
+  // failures. Also, take care to yield the scheduler. Windows scheduling gives
+  // CPU to a busy looping process, which can cause the program causing the lock
+  // contention to be starved of CPU by node, so the contention doesn't resolve.
+  if (platform === "win32") {
+    fs.rename = typeof fs.rename !== 'function' ? fs.rename
+    : (function (fs$rename) {
+      function rename (from, to, cb) {
+        var start = Date.now()
+        var backoff = 0;
+        fs$rename(from, to, function CB (er) {
+          if (er
+              && (er.code === "EACCES" || er.code === "EPERM")
+              && Date.now() - start < 60000) {
+            setTimeout(function() {
+              fs.stat(to, function (stater, st) {
+                if (stater && stater.code === "ENOENT")
+                  fs$rename(from, to, CB);
+                else
+                  cb(er)
+              })
+            }, backoff)
+            if (backoff < 100)
+              backoff += 10;
+            return;
+          }
+          if (cb) cb(er)
+        })
+      }
+      if (Object.setPrototypeOf) Object.setPrototypeOf(rename, fs$rename)
+      return rename
+    })(fs.rename)
+  }
+
+  // if read() returns EAGAIN, then just try it again.
+  fs.read = typeof fs.read !== 'function' ? fs.read
+  : (function (fs$read) {
+    function read (fd, buffer, offset, length, position, callback_) {
+      var callback
+      if (callback_ && typeof callback_ === 'function') {
+        var eagCounter = 0
+        callback = function (er, _, __) {
+          if (er && er.code === 'EAGAIN' && eagCounter < 10) {
+            eagCounter ++
+            return fs$read.call(fs, fd, buffer, offset, length, position, callback)
+          }
+          callback_.apply(this, arguments)
+        }
+      }
+      return fs$read.call(fs, fd, buffer, offset, length, position, callback)
+    }
+
+    // This ensures `util.promisify` works as it does for native `fs.read`.
+    if (Object.setPrototypeOf) Object.setPrototypeOf(read, fs$read)
+    return read
+  })(fs.read)
+
+  fs.readSync = typeof fs.readSync !== 'function' ? fs.readSync
+  : (function (fs$readSync) { return function (fd, buffer, offset, length, position) {
+    var eagCounter = 0
+    while (true) {
+      try {
+        return fs$readSync.call(fs, fd, buffer, offset, length, position)
+      } catch (er) {
+        if (er.code === 'EAGAIN' && eagCounter < 10) {
+          eagCounter ++
+          continue
+        }
+        throw er
+      }
+    }
+  }})(fs.readSync)
+
+  function patchLchmod (fs) {
+    fs.lchmod = function (path, mode, callback) {
+      fs.open( path
+             , constants.O_WRONLY | constants.O_SYMLINK
+             , mode
+             , function (err, fd) {
+        if (err) {
+          if (callback) callback(err)
+          return
+        }
+        // prefer to return the chmod error, if one occurs,
+        // but still try to close, and report closing errors if they occur.
+        fs.fchmod(fd, mode, function (err) {
+          fs.close(fd, function(err2) {
+            if (callback) callback(err || err2)
+          })
+        })
+      })
+    }
+
+    fs.lchmodSync = function (path, mode) {
+      var fd = fs.openSync(path, constants.O_WRONLY | constants.O_SYMLINK, mode)
+
+      // prefer to return the chmod error, if one occurs,
+      // but still try to close, and report closing errors if they occur.
+      var threw = true
+      var ret
+      try {
+        ret = fs.fchmodSync(fd, mode)
+        threw = false
+      } finally {
+        if (threw) {
+          try {
+            fs.closeSync(fd)
+          } catch (er) {}
+        } else {
+          fs.closeSync(fd)
+        }
+      }
+      return ret
+    }
+  }
+
+  function patchLutimes (fs) {
+    if (constants.hasOwnProperty("O_SYMLINK") && fs.futimes) {
+      fs.lutimes = function (path, at, mt, cb) {
+        fs.open(path, constants.O_SYMLINK, function (er, fd) {
+          if (er) {
+            if (cb) cb(er)
+            return
+          }
+          fs.futimes(fd, at, mt, function (er) {
+            fs.close(fd, function (er2) {
+              if (cb) cb(er || er2)
+            })
+          })
+        })
+      }
+
+      fs.lutimesSync = function (path, at, mt) {
+        var fd = fs.openSync(path, constants.O_SYMLINK)
+        var ret
+        var threw = true
+        try {
+          ret = fs.futimesSync(fd, at, mt)
+          threw = false
+        } finally {
+          if (threw) {
+            try {
+              fs.closeSync(fd)
+            } catch (er) {}
+          } else {
+            fs.closeSync(fd)
+          }
+        }
+        return ret
+      }
+
+    } else if (fs.futimes) {
+      fs.lutimes = function (_a, _b, _c, cb) { if (cb) process.nextTick(cb) }
+      fs.lutimesSync = function () {}
+    }
+  }
+
+  function chmodFix (orig) {
+    if (!orig) return orig
+    return function (target, mode, cb) {
+      return orig.call(fs, target, mode, function (er) {
+        if (chownErOk(er)) er = null
+        if (cb) cb.apply(this, arguments)
+      })
+    }
+  }
+
+  function chmodFixSync (orig) {
+    if (!orig) return orig
+    return function (target, mode) {
+      try {
+        return orig.call(fs, target, mode)
+      } catch (er) {
+        if (!chownErOk(er)) throw er
+      }
+    }
+  }
+
+
+  function chownFix (orig) {
+    if (!orig) return orig
+    return function (target, uid, gid, cb) {
+      return orig.call(fs, target, uid, gid, function (er) {
+        if (chownErOk(er)) er = null
+        if (cb) cb.apply(this, arguments)
+      })
+    }
+  }
+
+  function chownFixSync (orig) {
+    if (!orig) return orig
+    return function (target, uid, gid) {
+      try {
+        return orig.call(fs, target, uid, gid)
+      } catch (er) {
+        if (!chownErOk(er)) throw er
+      }
+    }
+  }
+
+  function statFix (orig) {
+    if (!orig) return orig
+    // Older versions of Node erroneously returned signed integers for
+    // uid + gid.
+    return function (target, options, cb) {
+      if (typeof options === 'function') {
+        cb = options
+        options = null
+      }
+      function callback (er, stats) {
+        if (stats) {
+          if (stats.uid < 0) stats.uid += 0x100000000
+          if (stats.gid < 0) stats.gid += 0x100000000
+        }
+        if (cb) cb.apply(this, arguments)
+      }
+      return options ? orig.call(fs, target, options, callback)
+        : orig.call(fs, target, callback)
+    }
+  }
+
+  function statFixSync (orig) {
+    if (!orig) return orig
+    // Older versions of Node erroneously returned signed integers for
+    // uid + gid.
+    return function (target, options) {
+      var stats = options ? orig.call(fs, target, options)
+        : orig.call(fs, target)
+      if (stats) {
+        if (stats.uid < 0) stats.uid += 0x100000000
+        if (stats.gid < 0) stats.gid += 0x100000000
+      }
+      return stats;
+    }
+  }
+
+  // ENOSYS means that the fs doesn't support the op. Just ignore
+  // that, because it doesn't matter.
+  //
+  // if there's no getuid, or if getuid() is something other
+  // than 0, and the error is EINVAL or EPERM, then just ignore
+  // it.
+  //
+  // This specific case is a silent failure in cp, install, tar,
+  // and most other unix tools that manage permissions.
+  //
+  // When running as root, or if other types of errors are
+  // encountered, then it's strict.
+  function chownErOk (er) {
+    if (!er)
+      return true
+
+    if (er.code === "ENOSYS")
+      return true
+
+    var nonroot = !process.getuid || process.getuid() !== 0
+    if (nonroot) {
+      if (er.code === "EINVAL" || er.code === "EPERM")
+        return true
+    }
+
+    return false
+  }
+}
+
+
+/***/ }),
+
+/***/ 1028:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+
+const path = __nccwpck_require__(6928);
+const Conf = __nccwpck_require__(988);
+const _defaults = __nccwpck_require__(5332);
+
+// https://github.com/npm/cli/blob/latest/lib/config/core.js#L101-L200
+module.exports = (opts, types, defaults) => {
+	const conf = new Conf(Object.assign({}, _defaults.defaults, defaults), types);
+
+	conf.add(Object.assign({}, opts), 'cli');
+	const warnings = [];
+	let failedToLoadBuiltInConfig = false;
+
+	if (__WEBPACK_EXTERNAL_createRequire(import.meta.url).resolve.paths) {
+		const paths = __WEBPACK_EXTERNAL_createRequire(import.meta.url).resolve.paths('npm');
+		// Assume that last path in resolve paths is builtin modules directory
+		let npmPath;
+		try {
+			npmPath = __WEBPACK_EXTERNAL_createRequire(import.meta.url).resolve('npm', {paths: paths.slice(-1)});
+		} catch (error) {
+			// Error will be thrown if module cannot be found.
+			// Update the flag while loading builtin config failed.
+			failedToLoadBuiltInConfig = true;
+		}
+
+		if (npmPath) {
+			/**
+			 *  According to https://github.com/npm/cli/blob/86f5bdb91f7a5971953a5171d32d6eeda6a2e972/lib/npm.js#L258
+			 *  and https://github.com/npm/cli/blob/86f5bdb91f7a5971953a5171d32d6eeda6a2e972/lib/config/core.js#L92
+			 */
+			warnings.push(conf.addFile(path.resolve(path.dirname(npmPath), '..', 'npmrc'), 'builtin'));
+		}
+	}
+
+	conf.addEnv();
+	conf.loadPrefix();
+
+	const projectConf = path.resolve(conf.localPrefix, '.npmrc');
+	const userConf = conf.get('userconfig');
+
+	if (!conf.get('global') && projectConf !== userConf) {
+		warnings.push(conf.addFile(projectConf, 'project'));
+	} else {
+		conf.add({}, 'project');
+	}
+
+	// TODO: cover with tests that configs from workspace .npmrc have bigger priority
+	// than the ones in userconfig
+	if (conf.get('workspace-prefix') && conf.get('workspace-prefix') !== projectConf) {
+		const workspaceConf = path.resolve(conf.get('workspace-prefix'), '.npmrc');
+		warnings.push(conf.addFile(workspaceConf, 'workspace'));
+	}
+
+	warnings.push(conf.addFile(conf.get('userconfig'), 'user'));
+
+	if (conf.get('prefix')) {
+		const etc = path.resolve(conf.get('prefix'), 'etc');
+		conf.root.globalconfig = path.resolve(etc, 'npmrc');
+		conf.root.globalignorefile = path.resolve(etc, 'npmignore');
+	}
+
+	warnings.push(conf.addFile(conf.get('globalconfig'), 'global'));
+	conf.loadUser();
+
+	const caFile = conf.get('cafile');
+
+	if (caFile) {
+		conf.loadCAFile(caFile);
+	}
+
+	return {
+		config: conf,
+		warnings: warnings.filter(Boolean),
+		failedToLoadBuiltInConfig,
+	};
+};
+
+Object.defineProperty(module.exports, "defaults", ({
+	get() {
+		return _defaults.defaults;
+	},
+	enumerable: true
+}))
+
+
+/***/ }),
+
+/***/ 988:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+
+const { readCAFileSync } = __nccwpck_require__(1572);
+const fs = __nccwpck_require__(9896);
+const path = __nccwpck_require__(6928);
+const {ConfigChain} = __nccwpck_require__(7218);
+const envKeyToSetting = __nccwpck_require__(2925);
+const util = __nccwpck_require__(2922);
+
+class Conf extends ConfigChain {
+	// https://github.com/npm/cli/blob/latest/lib/config/core.js#L203-L217
+	constructor(base, types) {
+		super(base);
+		this.root = base;
+		this._parseField = util.parseField.bind(null, types || __nccwpck_require__(4085));
+	}
+
+	// https://github.com/npm/cli/blob/latest/lib/config/core.js#L326-L338
+	add(data, marker) {
+		try {
+			for (const [key, value] of Object.entries(data)) {
+				const substKey = util.parseKey(key);
+				if (substKey !== key) {
+					delete data[key];
+				}
+				data[substKey] = this._parseField(value, substKey);
+			}
+		} catch (error) {
+			throw error;
+		}
+
+		return super.add(data, marker);
+	}
+
+	// https://github.com/npm/cli/blob/latest/lib/config/core.js#L306-L319
+	addFile(file, name) {
+		name = name || file;
+
+		const marker = {__source__: name};
+
+		this.sources[name] = {path: file, type: 'ini'};
+		this.push(marker);
+		this._await();
+
+		try {
+			const contents = fs.readFileSync(file, 'utf8');
+			this.addString(contents, file, 'ini', marker);
+		} catch (error) {
+			if (error.code === 'ENOENT') {
+				this.add({}, marker);
+			} else if (error.code !== 'EISDIR') {
+				return `Issue while reading "${file}". ${error.message}`
+			}
+		}
+	}
+
+	// https://github.com/npm/cli/blob/latest/lib/config/core.js#L341-L357
+	addEnv(env) {
+		env = env || process.env;
+
+		const conf = {};
+
+		Object.keys(env)
+			.filter(x => /^npm_config_/i.test(x))
+			.forEach(x => {
+				if (!env[x]) {
+					return;
+				}
+
+				// PNPM patch.
+				// BEGIN
+				const key = envKeyToSetting(x.substr(11));
+				const rawVal = env[x];
+
+				conf[key] = deserializeEnvVal(key, rawVal);
+				// END
+			});
+
+		return super.addEnv('', conf, 'env');
+	}
+
+	// https://github.com/npm/cli/blob/latest/lib/config/load-prefix.js
+	loadPrefix() {
+		const cli = this.list[0];
+
+		Object.defineProperty(this, 'prefix', {
+			enumerable: true,
+			set: prefix => {
+				const g = this.get('global');
+				this[g ? 'globalPrefix' : 'localPrefix'] = prefix;
+			},
+			get: () => {
+				const g = this.get('global');
+				return g ? this.globalPrefix : this.localPrefix;
+			}
+		});
+
+		Object.defineProperty(this, 'globalPrefix', {
+			enumerable: true,
+			set: prefix => {
+				this.set('prefix', prefix);
+			},
+			get: () => {
+				return path.resolve(this.get('prefix'));
+			}
+		});
+
+		let p;
+
+		Object.defineProperty(this, 'localPrefix', {
+			enumerable: true,
+			set: prefix => {
+				p = prefix;
+			},
+			get: () => {
+				return p;
+			}
+		});
+
+		if (Object.prototype.hasOwnProperty.call(cli, 'prefix')) {
+			p = path.resolve(cli.prefix);
+		} else {
+			try {
+				const prefix = util.findPrefix(process.cwd());
+				p = prefix;
+			} catch (error) {
+				throw error;
+			}
+		}
+
+		return p;
+	}
+
+	// https://github.com/npm/cli/blob/latest/lib/config/load-cafile.js
+	loadCAFile(file) {
+		if (!file) {
+			return;
+		}
+
+		const ca = readCAFileSync(file);
+		if (ca) {
+			this.set('ca', ca);
+		}
+	}
+
+	// https://github.com/npm/cli/blob/latest/lib/config/set-user.js
+	loadUser() {
+		const defConf = this.root;
+
+		if (this.get('global')) {
+			return;
+		}
+
+		if (process.env.SUDO_UID) {
+			defConf.user = Number(process.env.SUDO_UID);
+			return;
+		}
+
+		const prefix = path.resolve(this.get('prefix'));
+
+		try {
+			const stats = fs.statSync(prefix);
+			defConf.user = stats.uid;
+		} catch (error) {
+			if (error.code === 'ENOENT') {
+				return;
+			}
+
+			throw error;
+		}
+	}
+}
+
+// PNPM patch.
+// BEGIN
+function deserializeEnvVal(envKey, envValue) {
+	function deserializeList(envValue) {
+		const npmConfigSep = '\n\n';
+		if (envValue.indexOf(npmConfigSep)) {
+			// Supports NPM config serialization format. See:
+			// https://docs.npmjs.com/cli/v10/using-npm/config#ca
+			// https://github.com/npm/cli/blob/v10.0.0/workspaces/config/lib/set-envs.js#L15
+			return envValue.split(npmConfigSep);
+		}
+		return envValue.split(',');
+	}
+
+	switch (envKey) {
+		case 'hoist-pattern':
+		case 'public-hoist-pattern':
+			return deserializeList(envValue);
+	}
+	return envValue;
+}
+// END
+
+module.exports = Conf;
+
+
+/***/ }),
+
+/***/ 5332:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+// Generated with `lib/make.js`
+
+const os = __nccwpck_require__(857);
+const path = __nccwpck_require__(6928);
+
+const temp = os.tmpdir();
+const uidOrPid = process.getuid ? process.getuid() : process.pid;
+const hasUnicode = () => true;
+const isWindows = process.platform === 'win32';
+
+const osenv = {
+	editor: () => process.env.EDITOR || process.env.VISUAL || (isWindows ? 'notepad.exe' : 'vi'),
+	shell: () => isWindows ? (process.env.COMSPEC || 'cmd.exe') : (process.env.SHELL || '/bin/bash')
+};
+
+const umask = {
+	fromString: () => process.umask()
+};
+
+let home = os.homedir();
+
+if (home) {
+	process.env.HOME = home;
+} else {
+	home = path.resolve(temp, 'npm-' + uidOrPid);
+}
+
+const cacheExtra = process.platform === 'win32' ? 'npm-cache' : '.npm';
+const cacheRoot = process.platform === 'win32' && process.env.APPDATA || home;
+const cache = path.resolve(cacheRoot, cacheExtra);
+
+let defaults;
+let globalPrefix;
+
+Object.defineProperty(exports, "defaults", ({
+	get: function () {
+		if (defaults) return defaults;
+
+		if (process.env.PREFIX) {
+			globalPrefix = process.env.PREFIX;
+		} else if (process.platform === 'win32') {
+			// c:\node\node.exe --> prefix=c:\node\
+			globalPrefix = path.dirname(process.execPath);
+		} else {
+			// /usr/local/bin/node --> prefix=/usr/local
+			globalPrefix = path.dirname(path.dirname(process.execPath)); // destdir only is respected on Unix
+
+			if (process.env.DESTDIR) {
+				globalPrefix = path.join(process.env.DESTDIR, globalPrefix);
+			}
+		}
+
+		defaults = {
+			access: null,
+			'allow-same-version': false,
+			'always-auth': false,
+			also: null,
+			audit: true,
+			'auth-type': 'legacy',
+			'bin-links': true,
+			browser: null,
+			ca: null,
+			cafile: null,
+			cache: cache,
+			'cache-lock-stale': 60000,
+			'cache-lock-retries': 10,
+			'cache-lock-wait': 10000,
+			'cache-max': Infinity,
+			'cache-min': 10,
+			cert: null,
+			cidr: null,
+			color: process.env.NO_COLOR == null,
+			depth: Infinity,
+			description: true,
+			dev: false,
+			'dry-run': false,
+			editor: osenv.editor(),
+			'engine-strict': false,
+			force: false,
+			'fetch-retries': 2,
+			'fetch-retry-factor': 10,
+			'fetch-retry-mintimeout': 10000,
+			'fetch-retry-maxtimeout': 60000,
+			git: 'git',
+			'git-tag-version': true,
+			'commit-hooks': true,
+			global: false,
+			globalconfig: path.resolve(globalPrefix, 'etc', 'npmrc'),
+			'global-style': false,
+			group: process.platform === 'win32' ? 0 : process.env.SUDO_GID || process.getgid && process.getgid(),
+			'ham-it-up': false,
+			heading: 'npm',
+			'if-present': false,
+			'ignore-prepublish': false,
+			'ignore-scripts': false,
+			'init-module': path.resolve(home, '.npm-init.js'),
+			'init-author-name': '',
+			'init-author-email': '',
+			'init-author-url': '',
+			'init-version': '1.0.0',
+			'init-license': 'ISC',
+			json: false,
+			key: null,
+			'legacy-bundling': false,
+			link: false,
+			'local-address': undefined,
+			loglevel: 'notice',
+			logstream: process.stderr,
+			'logs-max': 10,
+			long: false,
+			maxsockets: 50,
+			message: '%s',
+			'metrics-registry': null,
+			'node-options': null,
+			// We remove node-version to fix the issue described here: https://github.com/pnpm/pnpm/issues/4203#issuecomment-1133872769
+			'offline': false,
+			'onload-script': false,
+			only: null,
+			optional: true,
+			otp: null,
+			'package-lock': true,
+			'package-lock-only': false,
+			parseable: false,
+			'prefer-offline': false,
+			'prefer-online': false,
+			prefix: globalPrefix,
+			production: process.env.NODE_ENV === 'production',
+			'progress': !process.env.TRAVIS && !process.env.CI,
+			provenance: false,
+			proxy: null,
+			'https-proxy': null,
+			'no-proxy': null,
+			'user-agent': 'npm/{npm-version} ' + 'node/{node-version} ' + '{platform} ' + '{arch}',
+			'read-only': false,
+			'rebuild-bundle': true,
+			registry: 'https://registry.npmjs.org/',
+			rollback: true,
+			save: true,
+			'save-bundle': false,
+			'save-dev': false,
+			'save-exact': false,
+			'save-optional': false,
+			'save-prefix': '^',
+			'save-prod': false,
+			scope: '',
+			'script-shell': null,
+			'scripts-prepend-node-path': 'warn-only',
+			searchopts: '',
+			searchexclude: null,
+			searchlimit: 20,
+			searchstaleness: 15 * 60,
+			'send-metrics': false,
+			shell: osenv.shell(),
+			shrinkwrap: true,
+			'sign-git-tag': false,
+			'sso-poll-frequency': 500,
+			'sso-type': 'oauth',
+			'strict-ssl': true,
+			tag: 'latest',
+			'tag-version-prefix': 'v',
+			timing: false,
+			tmp: temp,
+			unicode: hasUnicode(),
+			'unsafe-perm': process.platform === 'win32' || process.platform === 'cygwin' || !(process.getuid && process.setuid && process.getgid && process.setgid) || process.getuid() !== 0,
+			usage: false,
+			user: process.platform === 'win32' ? 0 : 'nobody',
+			userconfig: path.resolve(home, '.npmrc'),
+			umask: process.umask ? process.umask() : umask.fromString('022'),
+			version: false,
+			versions: false,
+			viewer: process.platform === 'win32' ? 'browser' : 'man',
+			_exit: true
+		};
+		return defaults;
+	}
+}));
+
+
+/***/ }),
+
+/***/ 2925:
+/***/ ((module) => {
+
+module.exports = function (x) {
+	const colonIndex = x.indexOf(':');
+	if (colonIndex === -1) {
+		return normalize(x);
+	}
+	const firstPart = x.substr(0, colonIndex);
+	const secondPart = x.substr(colonIndex + 1);
+	return `${normalize(firstPart)}:${normalize(secondPart)}`;
+}
+
+function normalize (s) {
+	s = s.toLowerCase();
+	if (s === '_authtoken') return '_authToken';
+	let r = s[0];
+	for (let i = 1; i < s.length; i++) {
+		r += s[i] === '_' ? '-' : s[i];
+	}
+	return r;
+}
+
+
+/***/ }),
+
+/***/ 4085:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+// Generated with `lib/make.js`
+
+const path = __nccwpck_require__(6928);
+const Stream = (__nccwpck_require__(2203).Stream);
+const url = __nccwpck_require__(7016);
+
+const Umask = () => {};
+const getLocalAddresses = () => [];
+const semver = () => {};
+
+exports.types = {
+	access: [null, 'restricted', 'public'],
+	'allow-same-version': Boolean,
+	'always-auth': Boolean,
+	also: [null, 'dev', 'development'],
+	audit: Boolean,
+	'auth-type': ['legacy', 'sso', 'saml', 'oauth'],
+	'bin-links': Boolean,
+	browser: [null, String],
+	ca: [null, String, Array],
+	cafile: path,
+	cache: path,
+	'cache-lock-stale': Number,
+	'cache-lock-retries': Number,
+	'cache-lock-wait': Number,
+	'cache-max': Number,
+	'cache-min': Number,
+	cert: [null, String],
+	cidr: [null, String, Array],
+	color: ['always', Boolean],
+	depth: Number,
+	description: Boolean,
+	dev: Boolean,
+	'dry-run': Boolean,
+	editor: String,
+	'engine-strict': Boolean,
+	force: Boolean,
+	'fetch-retries': Number,
+	'fetch-retry-factor': Number,
+	'fetch-retry-mintimeout': Number,
+	'fetch-retry-maxtimeout': Number,
+	git: String,
+	'git-tag-version': Boolean,
+	'commit-hooks': Boolean,
+	global: Boolean,
+	globalconfig: path,
+	'global-style': Boolean,
+	group: [Number, String],
+	'https-proxy': [null, url],
+	'user-agent': String,
+	'ham-it-up': Boolean,
+	'heading': String,
+	'if-present': Boolean,
+	'ignore-prepublish': Boolean,
+	'ignore-scripts': Boolean,
+	'init-module': path,
+	'init-author-name': String,
+	'init-author-email': String,
+	'init-author-url': ['', url],
+	'init-license': String,
+	'init-version': semver,
+	json: Boolean,
+	key: [null, String],
+	'legacy-bundling': Boolean,
+	link: Boolean,
+	// local-address must be listed as an IP for a local network interface
+	// must be IPv4 due to node bug
+	'local-address': getLocalAddresses(),
+	loglevel: ['silent', 'error', 'warn', 'notice', 'http', 'timing', 'info', 'verbose', 'silly'],
+	logstream: Stream,
+	'logs-max': Number,
+	long: Boolean,
+	maxsockets: Number,
+	message: String,
+	'metrics-registry': [null, String],
+	'node-options': [null, String],
+	'node-version': [null, semver],
+	'no-proxy': [null, String, Array],
+	offline: Boolean,
+	'onload-script': [null, String],
+	only: [null, 'dev', 'development', 'prod', 'production'],
+	optional: Boolean,
+	'package-lock': Boolean,
+	otp: [null, String],
+	'package-lock-only': Boolean,
+	parseable: Boolean,
+	'prefer-offline': Boolean,
+	'prefer-online': Boolean,
+	prefix: path,
+	production: Boolean,
+	progress: Boolean,
+	proxy: [null, false, url],
+	provenance: Boolean,
+	// allow proxy to be disabled explicitly
+	'read-only': Boolean,
+	'rebuild-bundle': Boolean,
+	registry: [null, url],
+	rollback: Boolean,
+	save: Boolean,
+	'save-bundle': Boolean,
+	'save-dev': Boolean,
+	'save-exact': Boolean,
+	'save-optional': Boolean,
+	'save-prefix': String,
+	'save-prod': Boolean,
+	scope: String,
+	'script-shell': [null, String],
+	'scripts-prepend-node-path': [false, true, 'auto', 'warn-only'],
+	searchopts: String,
+	searchexclude: [null, String],
+	searchlimit: Number,
+	searchstaleness: Number,
+	'send-metrics': Boolean,
+	shell: String,
+	shrinkwrap: Boolean,
+	'sign-git-tag': Boolean,
+	'sso-poll-frequency': Number,
+	'sso-type': [null, 'oauth', 'saml'],
+	'strict-ssl': Boolean,
+	tag: String,
+	timing: Boolean,
+	tmp: path,
+	unicode: Boolean,
+	'unsafe-perm': Boolean,
+	usage: Boolean,
+	user: [Number, String],
+	userconfig: path,
+	umask: Umask,
+	version: Boolean,
+	'tag-version-prefix': String,
+	versions: Boolean,
+	viewer: String,
+	_exit: Boolean
+};
+
+
+/***/ }),
+
+/***/ 2922:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+
+const fs = __nccwpck_require__(9896);
+const path = __nccwpck_require__(6928);
+const { envReplace } = __nccwpck_require__(1297);
+
+const parseKey = (key) => {
+	if (typeof key !== 'string') {
+		return key;
+	}
+
+	return envReplace(key, process.env);
+}
+
+// https://github.com/npm/cli/blob/latest/lib/config/core.js#L359-L404
+const parseField = (types, field, key) => {
+	if (typeof field !== 'string') {
+		return field;
+	}
+
+	const typeList = [].concat(types[key]);
+	const isPath = typeList.indexOf(path) !== -1;
+	const isBool = typeList.indexOf(Boolean) !== -1;
+	const isString = typeList.indexOf(String) !== -1;
+	const isNumber = typeList.indexOf(Number) !== -1;
+
+	field = `${field}`.trim();
+
+	if (/^".*"$/.test(field)) {
+		try {
+			field = JSON.parse(field);
+		} catch (error) {
+			throw new Error(`Failed parsing JSON config key ${key}: ${field}`);
+		}
+	}
+
+	if (isBool && !isString && field === '') {
+		return true;
+	}
+
+	switch (field) { // eslint-disable-line default-case
+		case 'true': {
+			return true;
+		}
+
+		case 'false': {
+			return false;
+		}
+
+		case 'null': {
+			return null;
+		}
+
+		case 'undefined': {
+			return undefined;
+		}
+	}
+
+	field = envReplace(field, process.env);
+
+	if (isPath) {
+		const regex = process.platform === 'win32' ? /^~(\/|\\)/ : /^~\//;
+
+		if (regex.test(field) && process.env.HOME) {
+			field = path.resolve(process.env.HOME, field.substr(2));
+		}
+
+		field = path.resolve(field);
+	}
+
+	if (isNumber && !isNaN(field)) {
+		field = Number(field);
+	}
+
+	return field;
+};
+
+// https://github.com/npm/cli/blob/latest/lib/config/find-prefix.js
+const findPrefix = name => {
+	name = path.resolve(name);
+
+	let walkedUp = false;
+
+	while (path.basename(name) === 'node_modules') {
+		name = path.dirname(name);
+		walkedUp = true;
+	}
+
+	if (walkedUp) {
+		return name;
+	}
+
+	const find = (name, original) => {
+		const regex = /^[a-zA-Z]:(\\|\/)?$/;
+
+		if (name === '/' || (process.platform === 'win32' && regex.test(name))) {
+			return original;
+		}
+
+		try {
+			const files = fs.readdirSync(name);
+
+			if (
+				files.includes('node_modules') ||
+				files.includes('package.json') ||
+				files.includes('package.json5') ||
+				files.includes('package.yaml') ||
+				files.includes('pnpm-workspace.yaml')
+			) {
+				return name;
+			}
+
+			const dirname = path.dirname(name);
+
+			if (dirname === name) {
+				return original;
+			}
+
+			return find(dirname, original);
+		} catch (error) {
+			if (name === original) {
+				if (error.code === 'ENOENT') {
+					return original;
+				}
+
+				throw error;
+			}
+
+			return original;
+		}
+	};
+
+	return find(name, name);
+};
+
+exports.envReplace = envReplace;
+exports.findPrefix = findPrefix;
+exports.parseField = parseField;
+exports.parseKey = parseKey;
+
+
+/***/ }),
+
 /***/ 4801:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -9389,6 +11252,295 @@ exports.flatten = (...args) => {
   flat(args);
   return result;
 };
+
+
+/***/ }),
+
+/***/ 7218:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+var ProtoList = __nccwpck_require__(5996)
+  , path = __nccwpck_require__(6928)
+  , fs = __nccwpck_require__(9896)
+  , ini = __nccwpck_require__(2616)
+  , EE = (__nccwpck_require__(4434).EventEmitter)
+  , url = __nccwpck_require__(7016)
+  , http = __nccwpck_require__(8611)
+
+var exports = module.exports = function () {
+  var args = [].slice.call(arguments)
+    , conf = new ConfigChain()
+
+  while(args.length) {
+    var a = args.shift()
+    if(a) conf.push
+          ( 'string' === typeof a
+            ? json(a)
+            : a )
+  }
+
+  return conf
+}
+
+//recursively find a file...
+
+var find = exports.find = function () {
+  var rel = path.join.apply(null, [].slice.call(arguments))
+
+  function find(start, rel) {
+    var file = path.join(start, rel)
+    try {
+      fs.statSync(file)
+      return file
+    } catch (err) {
+      if(path.dirname(start) !== start) // root
+        return find(path.dirname(start), rel)
+    }
+  }
+  return find(__dirname, rel)
+}
+
+var parse = exports.parse = function (content, file, type) {
+  content = '' + content
+  // if we don't know what it is, try json and fall back to ini
+  // if we know what it is, then it must be that.
+  if (!type) {
+    try { return JSON.parse(content) }
+    catch (er) { return ini.parse(content) }
+  } else if (type === 'json') {
+    if (this.emit) {
+      try { return JSON.parse(content) }
+      catch (er) { this.emit('error', er) }
+    } else {
+      return JSON.parse(content)
+    }
+  } else {
+    return ini.parse(content)
+  }
+}
+
+var json = exports.json = function () {
+  var args = [].slice.call(arguments).filter(function (arg) { return arg != null })
+  var file = path.join.apply(null, args)
+  var content
+  try {
+    content = fs.readFileSync(file,'utf-8')
+  } catch (err) {
+    return
+  }
+  return parse(content, file, 'json')
+}
+
+var env = exports.env = function (prefix, env) {
+  env = env || process.env
+  var obj = {}
+  var l = prefix.length
+  for(var k in env) {
+    if(k.indexOf(prefix) === 0)
+      obj[k.substring(l)] = env[k]
+  }
+
+  return obj
+}
+
+exports.ConfigChain = ConfigChain
+function ConfigChain () {
+  EE.apply(this)
+  ProtoList.apply(this, arguments)
+  this._awaiting = 0
+  this._saving = 0
+  this.sources = {}
+}
+
+// multi-inheritance-ish
+var extras = {
+  constructor: { value: ConfigChain }
+}
+Object.keys(EE.prototype).forEach(function (k) {
+  extras[k] = Object.getOwnPropertyDescriptor(EE.prototype, k)
+})
+ConfigChain.prototype = Object.create(ProtoList.prototype, extras)
+
+ConfigChain.prototype.del = function (key, where) {
+  // if not specified where, then delete from the whole chain, scorched
+  // earth style
+  if (where) {
+    var target = this.sources[where]
+    target = target && target.data
+    if (!target) {
+      return this.emit('error', new Error('not found '+where))
+    }
+    delete target[key]
+  } else {
+    for (var i = 0, l = this.list.length; i < l; i ++) {
+      delete this.list[i][key]
+    }
+  }
+  return this
+}
+
+ConfigChain.prototype.set = function (key, value, where) {
+  var target
+
+  if (where) {
+    target = this.sources[where]
+    target = target && target.data
+    if (!target) {
+      return this.emit('error', new Error('not found '+where))
+    }
+  } else {
+    target = this.list[0]
+    if (!target) {
+      return this.emit('error', new Error('cannot set, no confs!'))
+    }
+  }
+  target[key] = value
+  return this
+}
+
+ConfigChain.prototype.get = function (key, where) {
+  if (where) {
+    where = this.sources[where]
+    if (where) where = where.data
+    if (where && Object.hasOwnProperty.call(where, key)) return where[key]
+    return undefined
+  }
+  return this.list[0][key]
+}
+
+ConfigChain.prototype.save = function (where, type, cb) {
+  if (typeof type === 'function') cb = type, type = null
+  var target = this.sources[where]
+  if (!target || !(target.path || target.source) || !target.data) {
+    // TODO: maybe save() to a url target could be a PUT or something?
+    // would be easy to swap out with a reddis type thing, too
+    return this.emit('error', new Error('bad save target: '+where))
+  }
+
+  if (target.source) {
+    var pref = target.prefix || ''
+    Object.keys(target.data).forEach(function (k) {
+      target.source[pref + k] = target.data[k]
+    })
+    return this
+  }
+
+  var type = type || target.type
+  var data = target.data
+  if (target.type === 'json') {
+    data = JSON.stringify(data)
+  } else {
+    data = ini.stringify(data)
+  }
+
+  this._saving ++
+  fs.writeFile(target.path, data, 'utf8', function (er) {
+    this._saving --
+    if (er) {
+      if (cb) return cb(er)
+      else return this.emit('error', er)
+    }
+    if (this._saving === 0) {
+      if (cb) cb()
+      this.emit('save')
+    }
+  }.bind(this))
+  return this
+}
+
+ConfigChain.prototype.addFile = function (file, type, name) {
+  name = name || file
+  var marker = {__source__:name}
+  this.sources[name] = { path: file, type: type }
+  this.push(marker)
+  this._await()
+  fs.readFile(file, 'utf8', function (er, data) {
+    if (er) this.emit('error', er)
+    this.addString(data, file, type, marker)
+  }.bind(this))
+  return this
+}
+
+ConfigChain.prototype.addEnv = function (prefix, env, name) {
+  name = name || 'env'
+  var data = exports.env(prefix, env)
+  this.sources[name] = { data: data, source: env, prefix: prefix }
+  return this.add(data, name)
+}
+
+ConfigChain.prototype.addUrl = function (req, type, name) {
+  this._await()
+  var href = url.format(req)
+  name = name || href
+  var marker = {__source__:name}
+  this.sources[name] = { href: href, type: type }
+  this.push(marker)
+  http.request(req, function (res) {
+    var c = []
+    var ct = res.headers['content-type']
+    if (!type) {
+      type = ct.indexOf('json') !== -1 ? 'json'
+           : ct.indexOf('ini') !== -1 ? 'ini'
+           : href.match(/\.json$/) ? 'json'
+           : href.match(/\.ini$/) ? 'ini'
+           : null
+      marker.type = type
+    }
+
+    res.on('data', c.push.bind(c))
+    .on('end', function () {
+      this.addString(Buffer.concat(c), href, type, marker)
+    }.bind(this))
+    .on('error', this.emit.bind(this, 'error'))
+
+  }.bind(this))
+  .on('error', this.emit.bind(this, 'error'))
+  .end()
+
+  return this
+}
+
+ConfigChain.prototype.addString = function (data, file, type, marker) {
+  data = this.parse(data, file, type)
+  this.add(data, marker)
+  return this
+}
+
+ConfigChain.prototype.add = function (data, marker) {
+  if (marker && typeof marker === 'object') {
+    var i = this.list.indexOf(marker)
+    if (i === -1) {
+      return this.emit('error', new Error('bad marker'))
+    }
+    this.splice(i, 1, data)
+    marker = marker.__source__
+    this.sources[marker] = this.sources[marker] || {}
+    this.sources[marker].data = data
+    // we were waiting for this.  maybe emit 'load'
+    this._resolve()
+  } else {
+    if (typeof marker === 'string') {
+      this.sources[marker] = this.sources[marker] || {}
+      this.sources[marker].data = data
+    }
+    // trigger the load event if nothing was already going to do so.
+    this._await()
+    this.push(data)
+    process.nextTick(this._resolve.bind(this))
+  }
+  return this
+}
+
+ConfigChain.prototype.parse = exports.parse
+
+ConfigChain.prototype._await = function () {
+  this._awaiting++
+}
+
+ConfigChain.prototype._resolve = function () {
+  this._awaiting--
+  if (this._awaiting === 0) this.emit('load', this)
+}
 
 
 /***/ }),
@@ -11413,6 +13565,219 @@ const fill = (start, end, step, options = {}) => {
 };
 
 module.exports = fill;
+
+
+/***/ }),
+
+/***/ 2616:
+/***/ ((__unused_webpack_module, exports) => {
+
+exports.parse = exports.decode = decode
+
+exports.stringify = exports.encode = encode
+
+exports.safe = safe
+exports.unsafe = unsafe
+
+var eol = typeof process !== 'undefined' &&
+  process.platform === 'win32' ? '\r\n' : '\n'
+
+function encode (obj, opt) {
+  var children = []
+  var out = ''
+
+  if (typeof opt === 'string') {
+    opt = {
+      section: opt,
+      whitespace: false,
+    }
+  } else {
+    opt = opt || {}
+    opt.whitespace = opt.whitespace === true
+  }
+
+  var separator = opt.whitespace ? ' = ' : '='
+
+  Object.keys(obj).forEach(function (k, _, __) {
+    var val = obj[k]
+    if (val && Array.isArray(val)) {
+      val.forEach(function (item) {
+        out += safe(k + '[]') + separator + safe(item) + '\n'
+      })
+    } else if (val && typeof val === 'object')
+      children.push(k)
+    else
+      out += safe(k) + separator + safe(val) + eol
+  })
+
+  if (opt.section && out.length)
+    out = '[' + safe(opt.section) + ']' + eol + out
+
+  children.forEach(function (k, _, __) {
+    var nk = dotSplit(k).join('\\.')
+    var section = (opt.section ? opt.section + '.' : '') + nk
+    var child = encode(obj[k], {
+      section: section,
+      whitespace: opt.whitespace,
+    })
+    if (out.length && child.length)
+      out += eol
+
+    out += child
+  })
+
+  return out
+}
+
+function dotSplit (str) {
+  return str.replace(/\1/g, '\u0002LITERAL\\1LITERAL\u0002')
+    .replace(/\\\./g, '\u0001')
+    .split(/\./).map(function (part) {
+      return part.replace(/\1/g, '\\.')
+        .replace(/\2LITERAL\\1LITERAL\2/g, '\u0001')
+    })
+}
+
+function decode (str) {
+  var out = {}
+  var p = out
+  var section = null
+  //          section     |key      = value
+  var re = /^\[([^\]]*)\]$|^([^=]+)(=(.*))?$/i
+  var lines = str.split(/[\r\n]+/g)
+
+  lines.forEach(function (line, _, __) {
+    if (!line || line.match(/^\s*[;#]/))
+      return
+    var match = line.match(re)
+    if (!match)
+      return
+    if (match[1] !== undefined) {
+      section = unsafe(match[1])
+      if (section === '__proto__') {
+        // not allowed
+        // keep parsing the section, but don't attach it.
+        p = {}
+        return
+      }
+      p = out[section] = out[section] || {}
+      return
+    }
+    var key = unsafe(match[2])
+    if (key === '__proto__')
+      return
+    var value = match[3] ? unsafe(match[4]) : true
+    switch (value) {
+      case 'true':
+      case 'false':
+      case 'null': value = JSON.parse(value)
+    }
+
+    // Convert keys with '[]' suffix to an array
+    if (key.length > 2 && key.slice(-2) === '[]') {
+      key = key.substring(0, key.length - 2)
+      if (key === '__proto__')
+        return
+      if (!p[key])
+        p[key] = []
+      else if (!Array.isArray(p[key]))
+        p[key] = [p[key]]
+    }
+
+    // safeguard against resetting a previously defined
+    // array by accidentally forgetting the brackets
+    if (Array.isArray(p[key]))
+      p[key].push(value)
+    else
+      p[key] = value
+  })
+
+  // {a:{y:1},"a.b":{x:2}} --> {a:{y:1,b:{x:2}}}
+  // use a filter to return the keys that have to be deleted.
+  Object.keys(out).filter(function (k, _, __) {
+    if (!out[k] ||
+      typeof out[k] !== 'object' ||
+      Array.isArray(out[k]))
+      return false
+
+    // see if the parent section is also an object.
+    // if so, add it to that, and mark this one for deletion
+    var parts = dotSplit(k)
+    var p = out
+    var l = parts.pop()
+    var nl = l.replace(/\\\./g, '.')
+    parts.forEach(function (part, _, __) {
+      if (part === '__proto__')
+        return
+      if (!p[part] || typeof p[part] !== 'object')
+        p[part] = {}
+      p = p[part]
+    })
+    if (p === out && nl === l)
+      return false
+
+    p[nl] = out[k]
+    return true
+  }).forEach(function (del, _, __) {
+    delete out[del]
+  })
+
+  return out
+}
+
+function isQuoted (val) {
+  return (val.charAt(0) === '"' && val.slice(-1) === '"') ||
+    (val.charAt(0) === "'" && val.slice(-1) === "'")
+}
+
+function safe (val) {
+  return (typeof val !== 'string' ||
+    val.match(/[=\r\n]/) ||
+    val.match(/^\[/) ||
+    (val.length > 1 &&
+     isQuoted(val)) ||
+    val !== val.trim())
+    ? JSON.stringify(val)
+    : val.replace(/;/g, '\\;').replace(/#/g, '\\#')
+}
+
+function unsafe (val, doUnesc) {
+  val = (val || '').trim()
+  if (isQuoted(val)) {
+    // remove the single quotes before calling JSON.parse
+    if (val.charAt(0) === "'")
+      val = val.substr(1, val.length - 2)
+
+    try {
+      val = JSON.parse(val)
+    } catch (_) {}
+  } else {
+    // walk the val to find the first not-escaped ; character
+    var esc = false
+    var unesc = ''
+    for (var i = 0, l = val.length; i < l; i++) {
+      var c = val.charAt(i)
+      if (esc) {
+        if ('\\;#'.indexOf(c) !== -1)
+          unesc += c
+        else
+          unesc += '\\' + c
+
+        esc = false
+      } else if (';#'.indexOf(c) !== -1)
+        break
+      else if (c === '\\')
+        esc = true
+      else
+        unesc += c
+    }
+    if (esc)
+      unesc += '\\'
+
+    return unesc.trim()
+  }
+  return val
+}
 
 
 /***/ }),
@@ -14419,6 +16784,101 @@ function onceStrict (fn) {
 
 /***/ }),
 
+/***/ 5996:
+/***/ ((module) => {
+
+
+module.exports = ProtoList
+
+function setProto(obj, proto) {
+  if (typeof Object.setPrototypeOf === "function")
+    return Object.setPrototypeOf(obj, proto)
+  else
+    obj.__proto__ = proto
+}
+
+function ProtoList () {
+  this.list = []
+  var root = null
+  Object.defineProperty(this, 'root', {
+    get: function () { return root },
+    set: function (r) {
+      root = r
+      if (this.list.length) {
+        setProto(this.list[this.list.length - 1], r)
+      }
+    },
+    enumerable: true,
+    configurable: true
+  })
+}
+
+ProtoList.prototype =
+  { get length () { return this.list.length }
+  , get keys () {
+      var k = []
+      for (var i in this.list[0]) k.push(i)
+      return k
+    }
+  , get snapshot () {
+      var o = {}
+      this.keys.forEach(function (k) { o[k] = this.get(k) }, this)
+      return o
+    }
+  , get store () {
+      return this.list[0]
+    }
+  , push : function (obj) {
+      if (typeof obj !== "object") obj = {valueOf:obj}
+      if (this.list.length >= 1) {
+        setProto(this.list[this.list.length - 1], obj)
+      }
+      setProto(obj, this.root)
+      return this.list.push(obj)
+    }
+  , pop : function () {
+      if (this.list.length >= 2) {
+        setProto(this.list[this.list.length - 2], this.root)
+      }
+      return this.list.pop()
+    }
+  , unshift : function (obj) {
+      setProto(obj, this.list[0] || this.root)
+      return this.list.unshift(obj)
+    }
+  , shift : function () {
+      if (this.list.length === 1) {
+        setProto(this.list[0], this.root)
+      }
+      return this.list.shift()
+    }
+  , get : function (key) {
+      return this.list[0][key]
+    }
+  , set : function (key, val, save) {
+      if (!this.length) this.push({})
+      if (save && this.list[0].hasOwnProperty(key)) this.push({})
+      return this.list[0][key] = val
+    }
+  , forEach : function (fn, thisp) {
+      for (var key in this.list[0]) fn.call(thisp, key, this.list[0][key])
+    }
+  , slice : function () {
+      return this.list.slice.apply(this.list, arguments)
+    }
+  , splice : function () {
+      // handle injections
+      var ret = this.list.splice.apply(this.list, arguments)
+      for (var i = 0, l = this.list.length; i < l; i++) {
+        setProto(this.list[i], this.list[i + 1] || this.root)
+      }
+      return ret
+    }
+  }
+
+
+/***/ }),
+
 /***/ 4351:
 /***/ ((module) => {
 
@@ -14431,6 +16891,170 @@ module.exports = typeof queueMicrotask === 'function'
   : cb => (promise || (promise = Promise.resolve()))
     .then(cb)
     .catch(err => setTimeout(() => { throw err }, 0))
+
+
+/***/ }),
+
+/***/ 6668:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const npmConf = __nccwpck_require__(1028)
+
+const tokenKey = ':_authToken'
+const legacyTokenKey = ':_auth'
+const userKey = ':username'
+const passwordKey = ':_password'
+
+module.exports = function getRegistryAuthToken () {
+  let checkUrl
+  let options
+  if (arguments.length >= 2) {
+    checkUrl = arguments[0]
+    options = Object.assign({}, arguments[1])
+  } else if (typeof arguments[0] === 'string') {
+    checkUrl = arguments[0]
+  } else {
+    options = Object.assign({}, arguments[0])
+  }
+  options = options || {}
+
+  const providedNpmrc = options.npmrc
+  options.npmrc = (options.npmrc ? {
+    config: {
+      get: (key) => providedNpmrc[key]
+    }
+  } : npmConf()).config
+
+  checkUrl = checkUrl || options.npmrc.get('registry') || npmConf.defaults.registry
+  return getRegistryAuthInfo(checkUrl, options) || getLegacyAuthInfo(options.npmrc)
+}
+
+// https://nodejs.org/api/url.html#urlresolvefrom-to
+function urlResolve (from, to) {
+  const resolvedUrl = new URL(to, new URL(from.startsWith('//') ? `./${from}` : from, 'resolve://'))
+  if (resolvedUrl.protocol === 'resolve:') {
+    // `from` is a relative URL.
+    const { pathname, search, hash } = resolvedUrl
+    return pathname + search + hash
+  }
+  return resolvedUrl.toString()
+}
+
+function getRegistryAuthInfo (checkUrl, options) {
+  let parsed =
+    checkUrl instanceof URL
+      ? checkUrl
+      : new URL(checkUrl.startsWith('//') ? `http:${checkUrl}` : checkUrl)
+  let pathname
+
+  while (pathname !== '/' && parsed.pathname !== pathname) {
+    pathname = parsed.pathname || '/'
+
+    const regUrl = '//' + parsed.host + pathname.replace(/\/$/, '')
+    const authInfo = getAuthInfoForUrl(regUrl, options.npmrc)
+    if (authInfo) {
+      return authInfo
+    }
+
+    // break if not recursive
+    if (!options.recursive) {
+      return /\/$/.test(checkUrl)
+        ? undefined
+        : getRegistryAuthInfo(new URL('./', parsed), options)
+    }
+
+    parsed.pathname = urlResolve(normalizePath(pathname), '..') || '/'
+  }
+
+  return undefined
+}
+
+function getLegacyAuthInfo (npmrc) {
+  if (!npmrc.get('_auth')) {
+    return undefined
+  }
+
+  const token = replaceEnvironmentVariable(npmrc.get('_auth'))
+
+  return { token: token, type: 'Basic' }
+}
+
+function normalizePath (path) {
+  return path[path.length - 1] === '/' ? path : path + '/'
+}
+
+function getAuthInfoForUrl (regUrl, npmrc) {
+  // try to get bearer token
+  const bearerAuth = getBearerToken(npmrc.get(regUrl + tokenKey) || npmrc.get(regUrl + '/' + tokenKey))
+  if (bearerAuth) {
+    return bearerAuth
+  }
+
+  // try to get basic token
+  const username = npmrc.get(regUrl + userKey) || npmrc.get(regUrl + '/' + userKey)
+  const password = npmrc.get(regUrl + passwordKey) || npmrc.get(regUrl + '/' + passwordKey)
+  const basicAuth = getTokenForUsernameAndPassword(username, password)
+  if (basicAuth) {
+    return basicAuth
+  }
+
+  const basicAuthWithToken = getLegacyAuthToken(npmrc.get(regUrl + legacyTokenKey) || npmrc.get(regUrl + '/' + legacyTokenKey))
+  if (basicAuthWithToken) {
+    return basicAuthWithToken
+  }
+
+  return undefined
+}
+
+function replaceEnvironmentVariable (token) {
+  return token.replace(/^\$\{?([^}]*)\}?$/, function (fullMatch, envVar) {
+    return process.env[envVar]
+  })
+}
+
+function getBearerToken (tok) {
+  if (!tok) {
+    return undefined
+  }
+
+  // check if bearer token is set as environment variable
+  const token = replaceEnvironmentVariable(tok)
+
+  return { token: token, type: 'Bearer' }
+}
+
+function getTokenForUsernameAndPassword (username, password) {
+  if (!username || !password) {
+    return undefined
+  }
+
+  // passwords are base64 encoded, so we need to decode it
+  // See https://github.com/npm/npm/blob/v3.10.6/lib/config/set-credentials-by-uri.js#L26
+  const pass = Buffer.from(replaceEnvironmentVariable(password), 'base64').toString('utf8')
+
+  // a basic auth token is base64 encoded 'username:password'
+  // See https://github.com/npm/npm/blob/v3.10.6/lib/config/get-credentials-by-uri.js#L70
+  const token = Buffer.from(username + ':' + pass, 'utf8').toString('base64')
+
+  // we found a basicToken token so let's exit the loop
+  return {
+    token: token,
+    type: 'Basic',
+    password: pass,
+    username: username
+  }
+}
+
+function getLegacyAuthToken (tok) {
+  if (!tok) {
+    return undefined
+  }
+
+  // check if legacy auth token is set as environment variable
+  const token = replaceEnvironmentVariable(tok)
+
+  return { token: token, type: 'Basic' }
+}
 
 
 /***/ }),
@@ -37268,6 +39892,14 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 5715:
+/***/ ((module) => {
+
+module.exports = eval("require")("registry-auth-token/registry-url");
+
+
+/***/ }),
+
 /***/ 2613:
 /***/ ((module) => {
 
@@ -37300,6 +39932,13 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("child_proces
 /***/ ((module) => {
 
 module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("console");
+
+/***/ }),
+
+/***/ 9140:
+/***/ ((module) => {
+
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("constants");
 
 /***/ }),
 
@@ -39150,26 +41789,53 @@ const external_node_fs_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import
 const external_node_path_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:path");
 // EXTERNAL MODULE: ./node_modules/fast-glob/out/index.js
 var out = __nccwpck_require__(5648);
+// EXTERNAL MODULE: ./node_modules/registry-auth-token/index.js
+var registry_auth_token = __nccwpck_require__(6668);
+// EXTERNAL MODULE: ./node_modules/@vercel/ncc/dist/ncc/@@notfound.js?registry-auth-token/registry-url
+var registry_url = __nccwpck_require__(5715);
 ;// CONCATENATED MODULE: ./build/nodejs/check-npm.js
-async function npmExists(packageName, version, registry) {
-    registry = registry || 'https://registry.npmjs.org';
-    while (registry.endsWith('/')) {
-        registry = registry.slice(0, -1);
+
+
+const PACKAGE_NAME_PATTERN = /^(@[^/]+)?(.+)$/;
+/**
+ *
+ * @param packageName
+ * @param {string} [options]
+ * @param {string} [options.version]
+ * @param {string} options.registry
+ * @returns {Promise<string|undefined>}
+ */
+async function npmExists(packageName, options) {
+    const m = PACKAGE_NAME_PATTERN.exec(packageName);
+    if (!m)
+        throw new Error(`Invalid package name: ${packageName}`);
+    let registryUrl = options?.registry || registry_url(m[1]);
+    while (registryUrl.endsWith('/')) {
+        registryUrl = registryUrl.slice(0, -1);
     }
-    const registryUrl = `${registry}/${packageName}}` + (version ? `/${version}` : '');
-    const response = await fetch(registryUrl, {
+    const auth = registry_auth_token(registryUrl);
+    const requestUrl = `${registryUrl}/${packageName}}` +
+        (options.version ? `/${options.version}` : '');
+    const headers = {};
+    if (auth?.type === 'Bearer') {
+        headers.authorization = `Bearer ${auth.token}`;
+    }
+    else if (auth?.type === 'Basic') {
+        headers.authorization =
+            'Basic ' + Buffer.from(auth.token).toString('base64');
+    }
+    const response = await fetch(requestUrl, {
         method: 'GET',
+        headers,
     });
     if (response.status === 200) {
         const packageData = await response.json();
-        return packageData.version;
+        return packageData?.version;
     }
-    else if (response.status === 404) {
+    if (response.status === 404) {
         return '';
     }
-    else {
-        throw new Error(`Unexpected status code: ${response.status}`);
-    }
+    throw new Error(`Unexpected status code: ${response.status}`);
 }
 //# sourceMappingURL=check-npm.js.map
 ;// CONCATENATED MODULE: external "node:module"
@@ -39313,7 +41979,9 @@ async function scanProject(rootDir, dir) {
     }
     /** Check published version from npm repository */
     if (project.isNpmPackage) {
-        project.npmPublishedVersion = await npmExists(project.name, '', pkgJson.publishConfig?.registry);
+        project.npmPublishedVersion = await npmExists(project.name, {
+            registry: pkgJson.publishConfig?.registry,
+        });
     }
     return project;
 }

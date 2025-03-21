@@ -69,11 +69,9 @@ async function scanProject(
 
   /** Check published version from npm repository */
   if (project.isNpmPackage) {
-    project.npmPublishedVersion = await npmExists(
-      project.name,
-      '',
-      pkgJson.publishConfig?.registry,
-    );
+    project.npmPublishedVersion = await npmExists(project.name, {
+      registry: pkgJson.publishConfig?.registry,
+    });
   }
   return project;
 }

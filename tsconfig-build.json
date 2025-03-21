@@ -1,9 +1,9 @@
 {
   "extends": ["./tsconfig-base.json", "@panates/tsconfig/build.json"],
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "NodeNext",
-    "moduleResolution": "Node16",
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "node",
     "declaration": false,
     "outDir": "build",
     "sourceMap": true
