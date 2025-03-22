@@ -399,7 +399,7 @@ var require_tunnel = __commonJS({
         connectOptions.headers = connectOptions.headers || {};
         connectOptions.headers["Proxy-Authorization"] = "Basic " + new Buffer(connectOptions.proxyAuth).toString("base64");
       }
-      debug("making CONNECT request");
+      debug2("making CONNECT request");
       var connectReq = self.request(connectOptions);
       connectReq.useChunkedEncodingByDefault = false;
       connectReq.once("response", onResponse);
@@ -419,7 +419,7 @@ var require_tunnel = __commonJS({
         connectReq.removeAllListeners();
         socket.removeAllListeners();
         if (res.statusCode !== 200) {
-          debug(
+          debug2(
             "tunneling socket could not be established, statusCode=%d",
             res.statusCode
           );
@@ -431,7 +431,7 @@ var require_tunnel = __commonJS({
           return;
         }
         if (head.length > 0) {
-          debug("got illegal response body from proxy");
+          debug2("got illegal response body from proxy");
           socket.destroy();
           var error = new Error("got illegal response body from proxy");
           error.code = "ECONNRESET";
@@ -439,13 +439,13 @@ var require_tunnel = __commonJS({
           self.removeSocket(placeholder);
           return;
         }
-        debug("tunneling connection has established");
+        debug2("tunneling connection has established");
         self.sockets[self.sockets.indexOf(placeholder)] = socket;
         return cb(socket);
       }
       function onError(cause) {
         connectReq.removeAllListeners();
-        debug(
+        debug2(
           "tunneling socket could not be established, cause=%s\n",
           cause.message,
           cause.stack
@@ -507,9 +507,9 @@ var require_tunnel = __commonJS({
       }
       return target;
     }
-    var debug;
+    var debug2;
     if (process.env.NODE_DEBUG && /\btunnel\b/.test(process.env.NODE_DEBUG)) {
-      debug = function() {
+      debug2 = function() {
         var args = Array.prototype.slice.call(arguments);
         if (typeof args[0] === "string") {
           args[0] = "TUNNEL: " + args[0];
@@ -519,10 +519,10 @@ var require_tunnel = __commonJS({
         console.error.apply(console, args);
       };
     } else {
-      debug = function() {
+      debug2 = function() {
       };
     }
-    exports.debug = debug;
+    exports.debug = debug2;
   }
 });
 
@@ -19735,10 +19735,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       return process.env["RUNNER_DEBUG"] === "1";
     }
     exports.isDebug = isDebug;
-    function debug(message) {
+    function debug2(message) {
       (0, command_1.issueCommand)("debug", {}, message);
     }
-    exports.debug = debug;
+    exports.debug = debug2;
     function error(message, properties = {}) {
       (0, command_1.issueCommand)("error", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
@@ -29598,7 +29598,7 @@ var require_out4 = __commonJS({
 });
 
 // build/index.js
-var core = __toESM(require_core(), 1);
+var core2 = __toESM(require_core(), 1);
 var github = __toESM(require_github(), 1);
 var import_ansi_colors = __toESM(require_ansi_colors(), 1);
 
@@ -29608,15 +29608,25 @@ import fs3 from "node:fs";
 import path3 from "node:path";
 
 // build/nodejs/check-npm.js
+var core = __toESM(require_core(), 1);
 import { execSync } from "node:child_process";
 async function npmExists(packageName, options) {
   const registry = options?.registry || "https://registry.npmjs.org";
   try {
-    return execSync(`npm show ${packageName} version` + (registry ? ` --registry ${registry}` : ""), { cwd: options.cwd, stdio: "pipe" }).toString().trim();
+    if (options.version)
+      packageName += `@${options.version}`;
+    const version = execSync(`npm show ${packageName} version` + (registry ? ` --registry ${registry}` : ""), {
+      cwd: options?.cwd,
+      stdio: "pipe"
+    }).toString().trim();
+    core.debug(version);
+    return version;
   } catch (error) {
     const msg = error.stderr.toString();
-    if (msg.includes("E404"))
+    if (msg.includes("E404")) {
+      core.debug(msg);
       return;
+    }
     throw new Error(msg);
   }
 }
@@ -29786,11 +29796,11 @@ async function scanEnvironment(args) {
 
 // build/index.js
 async function run() {
-  const token = core.getInput("token", { trimWhitespace: true }) || process.env.GITHUB_TOKEN;
+  const token = core2.getInput("token", { trimWhitespace: true }) || process.env.GITHUB_TOKEN;
   if (!token)
     throw new Error('"token" is required');
   const octokit = github.getOctokit(token);
-  const rootDir = core.getInput("rootDir", { trimWhitespace: true }) || process.env.GITHUB_WORKSPACE || process.cwd();
+  const rootDir = core2.getInput("rootDir", { trimWhitespace: true }) || process.env.GITHUB_WORKSPACE || process.cwd();
   const output = await scanEnvironment({
     rootDir,
     token
@@ -29822,23 +29832,23 @@ async function run() {
   output.prevTagSha = tagsRequest.data[1]?.commit?.sha || "";
   const dockerPackages = output.packages.reduce((acc, p) => p.isDockerApp ? ++acc : acc, 0);
   const npmPackages = output.packages.reduce((acc, p) => p.isNpmPackage ? ++acc : acc, 0);
-  core.setOutput("environment", output.environment);
-  core.setOutput("monorepo", output.monorepo);
-  core.setOutput("lastTag", output.lastTag || "");
-  core.setOutput("lastTagSha", output.lastTagSha || "");
-  core.setOutput("prevTag", output.prevTag || "");
-  core.setOutput("prevTagSha", output.prevTagSha || "");
-  core.setOutput("releaseId", output.releaseId || "");
-  core.setOutput("releaseName", output.releaseName || "");
-  core.setOutput("releaseTag", output.releaseTag || "");
-  core.setOutput("releaseDate", output.releaseDate || "");
-  core.setOutput("packages", JSON.stringify(output.packages));
-  core.setOutput("dockerPackages", dockerPackages);
-  core.setOutput("npmPackages", npmPackages);
-  const printOutput = core.getInput("print-output", { trimWhitespace: true });
+  core2.setOutput("environment", output.environment);
+  core2.setOutput("monorepo", output.monorepo);
+  core2.setOutput("lastTag", output.lastTag || "");
+  core2.setOutput("lastTagSha", output.lastTagSha || "");
+  core2.setOutput("prevTag", output.prevTag || "");
+  core2.setOutput("prevTagSha", output.prevTagSha || "");
+  core2.setOutput("releaseId", output.releaseId || "");
+  core2.setOutput("releaseName", output.releaseName || "");
+  core2.setOutput("releaseTag", output.releaseTag || "");
+  core2.setOutput("releaseDate", output.releaseDate || "");
+  core2.setOutput("packages", JSON.stringify(output.packages));
+  core2.setOutput("dockerPackages", dockerPackages);
+  core2.setOutput("npmPackages", npmPackages);
+  const printOutput = core2.getInput("print-output", { trimWhitespace: true });
   if (printOutput === "true" || printOutput === "") {
     let title;
-    core.startGroup(import_ansi_colors.default.yellowBright("Repository info:"));
+    core2.startGroup(import_ansi_colors.default.yellowBright("Repository info:"));
     console.log(import_ansi_colors.default.yellow("Environment:"), output.environment);
     console.log(import_ansi_colors.default.yellow("Monorepo:"), output.monorepo ? import_ansi_colors.default.green("yes") : import_ansi_colors.default.red("no"));
     console.log(import_ansi_colors.default.yellow("Git Tag:"), output.lastTag || "-", import_ansi_colors.default.yellow("  SHA:"), import_ansi_colors.default.magenta(output.lastTagSha || ""));
@@ -29868,11 +29878,11 @@ async function run() {
       console.log(import_ansi_colors.default.yellow("  Date:"), output.releaseDate);
     } else
       console.log(title, import_ansi_colors.default.red("-"));
-    core.endGroup();
+    core2.endGroup();
   }
 }
 run().catch((error) => {
-  core.setFailed(error.message);
+  core2.setFailed(error.message);
 });
 /*! Bundled license information:
 
