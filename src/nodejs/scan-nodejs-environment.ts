@@ -6,41 +6,50 @@ import {
   RepositoryInfo,
 } from '../interfaces/repository-info.interface.js';
 import { npmExists } from './check-npm.js';
+import { setNpmrcValue } from './npmrc-utils.js';
 import { processTsConfig } from './read-tsconfig.js';
 
-export async function scanNodeJSEnvironment(
-  rootDir: string,
-): Promise<RepositoryInfo | undefined> {
+export async function scanNodeJSEnvironment(args: {
+  rootDir: string;
+  token: string;
+}): Promise<RepositoryInfo | undefined> {
   const output: RepositoryInfo = {
     environment: 'nodejs',
     monorepo: false,
     packages: [],
   };
-  const fileName = path.join(rootDir, 'package.json');
+  const fileName = path.join(args.rootDir, 'package.json');
   if (!fs.existsSync(fileName)) return;
   const rootJson = JSON.parse(fs.readFileSync(fileName, 'utf-8'));
   if (rootJson.workspaces) {
     output.monorepo = true;
     const dirs = glob.sync(rootJson.workspaces, {
-      cwd: rootDir,
+      cwd: args.rootDir,
       onlyDirectories: true,
     });
     for (const dir of dirs) {
-      const project = await scanProject(rootDir, dir);
+      const project = await scanProject({
+        ...args,
+        dir,
+      });
       if (project) output.packages.push(project);
     }
   } else {
-    const project = await scanProject(rootDir, '.');
+    const project = await scanProject({
+      ...args,
+      dir: '.',
+    });
     if (project) output.packages.push(project);
   }
   return output.packages.length ? output : undefined;
 }
 
-async function scanProject(
-  rootDir: string,
-  dir: string,
-): Promise<PackageInfo | undefined> {
-  const packageDir = path.join(rootDir, dir);
+async function scanProject(args: {
+  rootDir: string;
+  token: string;
+  dir: string;
+}): Promise<PackageInfo | undefined> {
+  const packageDir = path.join(args.rootDir, args.dir);
   /** Check package.json */
   let fileName = path.join(packageDir, 'package.json');
   if (!fs.existsSync(fileName)) return;
@@ -50,7 +59,7 @@ async function scanProject(
     name: pkgJson.name,
     version: pkgJson.version,
     description: pkgJson.description,
-    directory: dir,
+    directory: args.dir,
     buildDir: './',
   };
   if (!pkgJson.private || pkgJson.publishConfig || dockerFileExists) {
@@ -64,13 +73,15 @@ async function scanProject(
   /** Check if is a TypeScript project */
   fileName = path.join(packageDir, 'tsconfig.json');
   if (fs.existsSync(fileName)) {
-    await processTsConfig(project, rootDir, pkgJson);
+    await processTsConfig(project, args.rootDir, pkgJson);
   }
 
   /** Check published version from npm repository */
   if (project.isNpmPackage) {
+    setNpmrcValue('//npm.pkg.github.com/:_authToken', args.token, packageDir);
     project.npmPublishedVersion = await npmExists(project.name, {
       registry: pkgJson.publishConfig?.registry,
+      cwd: packageDir,
     });
   }
   return project;

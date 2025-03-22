@@ -16,7 +16,10 @@ async function run() {
     process.env.GITHUB_WORKSPACE ||
     process.cwd();
 
-  const output: RepositoryInfo = (await scanEnvironment(rootDir)) || {
+  const output: RepositoryInfo = (await scanEnvironment({
+    rootDir,
+    token,
+  })) || {
     environment: 'unknown',
     monorepo: false,
     packages: [],
