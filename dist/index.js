@@ -29617,7 +29617,7 @@ async function npmExists(packageName, options) {
     const msg = error.stderr.toString();
     if (msg.includes("E404"))
       return;
-    console.error("Error fetching version from npm repository:", msg);
+    throw new Error(msg);
   }
 }
 

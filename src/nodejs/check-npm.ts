@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process';
+import * as core from '@actions/core';
 
 /**
  *
@@ -12,16 +13,25 @@ import { execSync } from 'node:child_process';
 export async function npmExists(packageName, options) {
   const registry = options?.registry || 'https://registry.npmjs.org';
   try {
-    return execSync(
+    if (options.version) packageName += `@${options.version}`;
+    const version = execSync(
       `npm show ${packageName} version` +
         (registry ? ` --registry ${registry}` : ''),
-      { cwd: options.cwd, stdio: 'pipe' },
+      {
+        cwd: options?.cwd,
+        stdio: 'pipe',
+      },
     )
       .toString()
       .trim();
+    core.debug(version);
+    return version;
   } catch (error: any) {
     const msg = error.stderr.toString();
-    if (msg.includes('E404')) return;
+    if (msg.includes('E404')) {
+      core.debug(msg);
+      return;
+    }
     throw new Error(msg);
   }
 }
