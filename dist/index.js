@@ -17589,12 +17589,12 @@ var require_lib = __commonJS({
             throw new Error("Client has already been disposed.");
           }
           const parsedUrl = new URL(requestUrl);
-          let info = this._prepareRequest(verb, parsedUrl, headers);
+          let info2 = this._prepareRequest(verb, parsedUrl, headers);
           const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb) ? this._maxRetries + 1 : 1;
           let numTries = 0;
           let response;
           do {
-            response = yield this.requestRaw(info, data);
+            response = yield this.requestRaw(info2, data);
             if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
               let authenticationHandler;
               for (const handler of this.handlers) {
@@ -17604,7 +17604,7 @@ var require_lib = __commonJS({
                 }
               }
               if (authenticationHandler) {
-                return authenticationHandler.handleAuthentication(this, info, data);
+                return authenticationHandler.handleAuthentication(this, info2, data);
               } else {
                 return response;
               }
@@ -17627,8 +17627,8 @@ var require_lib = __commonJS({
                   }
                 }
               }
-              info = this._prepareRequest(verb, parsedRedirectUrl, headers);
-              response = yield this.requestRaw(info, data);
+              info2 = this._prepareRequest(verb, parsedRedirectUrl, headers);
+              response = yield this.requestRaw(info2, data);
               redirectsRemaining--;
             }
             if (!response.message.statusCode || !HttpResponseRetryCodes.includes(response.message.statusCode)) {
@@ -17657,7 +17657,7 @@ var require_lib = __commonJS({
        * @param info
        * @param data
        */
-      requestRaw(info, data) {
+      requestRaw(info2, data) {
         return __awaiter(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
             function callbackForResult(err, res) {
@@ -17669,7 +17669,7 @@ var require_lib = __commonJS({
                 resolve(res);
               }
             }
-            this.requestRawWithCallback(info, data, callbackForResult);
+            this.requestRawWithCallback(info2, data, callbackForResult);
           });
         });
       }
@@ -17679,12 +17679,12 @@ var require_lib = __commonJS({
        * @param data
        * @param onResult
        */
-      requestRawWithCallback(info, data, onResult) {
+      requestRawWithCallback(info2, data, onResult) {
         if (typeof data === "string") {
-          if (!info.options.headers) {
-            info.options.headers = {};
+          if (!info2.options.headers) {
+            info2.options.headers = {};
           }
-          info.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
+          info2.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
         }
         let callbackCalled = false;
         function handleResult(err, res) {
@@ -17693,7 +17693,7 @@ var require_lib = __commonJS({
             onResult(err, res);
           }
         }
-        const req = info.httpModule.request(info.options, (msg) => {
+        const req = info2.httpModule.request(info2.options, (msg) => {
           const res = new HttpClientResponse(msg);
           handleResult(void 0, res);
         });
@@ -17705,7 +17705,7 @@ var require_lib = __commonJS({
           if (socket) {
             socket.end();
           }
-          handleResult(new Error(`Request timeout: ${info.options.path}`));
+          handleResult(new Error(`Request timeout: ${info2.options.path}`));
         });
         req.on("error", function(err) {
           handleResult(err);
@@ -17741,27 +17741,27 @@ var require_lib = __commonJS({
         return this._getProxyAgentDispatcher(parsedUrl, proxyUrl);
       }
       _prepareRequest(method, requestUrl, headers) {
-        const info = {};
-        info.parsedUrl = requestUrl;
-        const usingSsl = info.parsedUrl.protocol === "https:";
-        info.httpModule = usingSsl ? https : http;
+        const info2 = {};
+        info2.parsedUrl = requestUrl;
+        const usingSsl = info2.parsedUrl.protocol === "https:";
+        info2.httpModule = usingSsl ? https : http;
         const defaultPort = usingSsl ? 443 : 80;
-        info.options = {};
-        info.options.host = info.parsedUrl.hostname;
-        info.options.port = info.parsedUrl.port ? parseInt(info.parsedUrl.port) : defaultPort;
-        info.options.path = (info.parsedUrl.pathname || "") + (info.parsedUrl.search || "");
-        info.options.method = method;
-        info.options.headers = this._mergeHeaders(headers);
+        info2.options = {};
+        info2.options.host = info2.parsedUrl.hostname;
+        info2.options.port = info2.parsedUrl.port ? parseInt(info2.parsedUrl.port) : defaultPort;
+        info2.options.path = (info2.parsedUrl.pathname || "") + (info2.parsedUrl.search || "");
+        info2.options.method = method;
+        info2.options.headers = this._mergeHeaders(headers);
         if (this.userAgent != null) {
-          info.options.headers["user-agent"] = this.userAgent;
+          info2.options.headers["user-agent"] = this.userAgent;
         }
-        info.options.agent = this._getAgent(info.parsedUrl);
+        info2.options.agent = this._getAgent(info2.parsedUrl);
         if (this.handlers) {
           for (const handler of this.handlers) {
-            handler.prepareRequest(info.options);
+            handler.prepareRequest(info2.options);
           }
         }
-        return info;
+        return info2;
       }
       _mergeHeaders(headers) {
         if (this.requestOptions && this.requestOptions.headers) {
@@ -19751,10 +19751,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       (0, command_1.issueCommand)("notice", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
     exports.notice = notice;
-    function info(message) {
+    function info2(message) {
       process.stdout.write(message + os.EOL);
     }
-    exports.info = info;
+    exports.info = info2;
     function startGroup2(name) {
       (0, command_1.issue)("group", name);
     }
@@ -29009,7 +29009,7 @@ var require_partial = __commonJS({
       match(filepath) {
         const parts = filepath.split("/");
         const levels = parts.length;
-        const patterns = this._storage.filter((info) => !info.complete || info.segments.length > levels);
+        const patterns = this._storage.filter((info2) => !info2.complete || info2.segments.length > levels);
         for (const pattern of patterns) {
           const section = pattern.sections[0];
           if (!pattern.complete && levels > section.length) {
@@ -29848,36 +29848,35 @@ async function run() {
   const printOutput = core2.getInput("print-output", { trimWhitespace: true });
   if (printOutput === "true" || printOutput === "") {
     let title;
-    core2.startGroup(import_ansi_colors.default.yellowBright("Repository info:"));
-    console.log(import_ansi_colors.default.yellow("Environment:"), output.environment);
-    console.log(import_ansi_colors.default.yellow("Monorepo:"), output.monorepo ? import_ansi_colors.default.green("yes") : import_ansi_colors.default.red("no"));
-    console.log(import_ansi_colors.default.yellow("Git Tag:"), output.lastTag || "-", import_ansi_colors.default.yellow("  SHA:"), import_ansi_colors.default.magenta(output.lastTagSha || ""));
-    console.log(import_ansi_colors.default.yellow("Git Prev Tag:"), output.prevTag || "-", import_ansi_colors.default.yellow("  SHA:"), import_ansi_colors.default.magenta(output.prevTagSha || ""));
-    console.log(import_ansi_colors.default.yellow("Docker Packages:"), String(dockerPackages));
-    console.log(import_ansi_colors.default.yellow("Npm Packages:"), String(npmPackages));
-    title = import_ansi_colors.default.yellow("Packages:");
-    if (output.packages.length) {
-      console.log(title);
-      output.packages.forEach((p) => {
-        console.log(import_ansi_colors.default.yellow("  \u25C9 ") + import_ansi_colors.default.green(p.name));
-        console.log(import_ansi_colors.default.yellow("    description: ") + p.description);
-        console.log(import_ansi_colors.default.yellow("    target:") + (p.isDockerApp ? "  \u2638 Docker" : "") + (p.isNpmPackage ? "  \u{1F4DA} npm" : ""));
-        console.log(import_ansi_colors.default.yellow("    version: ") + p.version);
-        if (p.npmPublishedVersion)
-          console.log(import_ansi_colors.default.yellow("    npm version: ") + p.npmPublishedVersion);
-        console.log(import_ansi_colors.default.yellow("    project directory: ") + p.directory);
-        console.log(import_ansi_colors.default.yellow("    build directory: ") + p.buildDir);
-      });
-    } else
-      console.log(title, import_ansi_colors.default.red("-"));
+    core2.info(import_ansi_colors.default.yellow("Environment: ") + output.environment);
+    core2.info(import_ansi_colors.default.yellow("Monorepo: ") + output.monorepo ? import_ansi_colors.default.green("yes") : import_ansi_colors.default.red("no"));
+    core2.info(import_ansi_colors.default.yellow("Git Tag: ") + (output.lastTag || "-") + import_ansi_colors.default.yellow("   SHA: ") + import_ansi_colors.default.magenta(output.lastTagSha || ""));
+    core2.info(import_ansi_colors.default.yellow("Git Prev Tag: ") + (output.prevTag || "-") + import_ansi_colors.default.yellow("   SHA: ") + import_ansi_colors.default.magenta(output.prevTagSha || ""));
+    core2.info(import_ansi_colors.default.yellow("Docker Packages: ") + String(dockerPackages));
+    core2.info(import_ansi_colors.default.yellow("Npm Packages: ") + String(npmPackages));
     title = import_ansi_colors.default.yellow("Last Release:");
     if (output.releaseId) {
-      console.log(title);
-      console.log(import_ansi_colors.default.yellow("  Name:"), output.releaseName);
-      console.log(import_ansi_colors.default.yellow("  Tag:"), output.releaseTag);
-      console.log(import_ansi_colors.default.yellow("  Date:"), output.releaseDate);
+      core2.info(title);
+      core2.info(import_ansi_colors.default.yellow("  Name: ") + output.releaseName);
+      core2.info(import_ansi_colors.default.yellow("  Tag: ") + output.releaseTag);
+      core2.info(import_ansi_colors.default.yellow("  Date: ") + output.releaseDate);
     } else
-      console.log(title, import_ansi_colors.default.red("-"));
+      core2.info(title + import_ansi_colors.default.red(" -"));
+    core2.startGroup(import_ansi_colors.default.yellowBright("Packages"));
+    title = import_ansi_colors.default.yellow("Packages:");
+    if (output.packages.length) {
+      output.packages.forEach((p) => {
+        core2.info(import_ansi_colors.default.yellow("  \u25C9 ") + import_ansi_colors.default.green(p.name));
+        core2.info(import_ansi_colors.default.yellow("    description: ") + p.description);
+        core2.info(import_ansi_colors.default.yellow("    target:") + (p.isDockerApp ? "  \u2638 Docker" : "") + (p.isNpmPackage ? "  \u{1F4DA} npm" : ""));
+        core2.info(import_ansi_colors.default.yellow("    version: ") + p.version);
+        if (p.npmPublishedVersion)
+          core2.info(import_ansi_colors.default.yellow("    npm version: ") + p.npmPublishedVersion);
+        core2.info(import_ansi_colors.default.yellow("    project directory: ") + p.directory);
+        core2.info(import_ansi_colors.default.yellow("    build directory: ") + p.buildDir);
+      });
+    } else
+      core2.info(title + import_ansi_colors.default.red(" -"));
     core2.endGroup();
   }
 }

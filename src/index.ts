@@ -73,57 +73,54 @@ async function run() {
   const printOutput = core.getInput('print-output', { trimWhitespace: true });
   if (printOutput === 'true' || printOutput === '') {
     let title: string;
-    core.startGroup(colors.yellowBright('Repository info:'));
-    console.log(colors.yellow('Environment:'), output.environment);
-    console.log(
-      colors.yellow('Monorepo:'),
-      output.monorepo ? colors.green('yes') : colors.red('no'),
+    core.info(colors.yellow('Environment: ') + output.environment);
+    core.info(
+      colors.yellow('Monorepo: ') + output.monorepo
+        ? colors.green('yes')
+        : colors.red('no'),
     );
-    console.log(
-      colors.yellow('Git Tag:'),
-      output.lastTag || '-',
-      colors.yellow('  SHA:'),
-      colors.magenta(output.lastTagSha || ''),
+    core.info(
+      colors.yellow('Git Tag: ') +
+        (output.lastTag || '-') +
+        colors.yellow('   SHA: ') +
+        colors.magenta(output.lastTagSha || ''),
     );
-    console.log(
-      colors.yellow('Git Prev Tag:'),
-      output.prevTag || '-',
-      colors.yellow('  SHA:'),
-      colors.magenta(output.prevTagSha || ''),
+    core.info(
+      colors.yellow('Git Prev Tag: ') +
+        (output.prevTag || '-') +
+        colors.yellow('   SHA: ') +
+        colors.magenta(output.prevTagSha || ''),
     );
 
-    console.log(colors.yellow('Docker Packages:'), String(dockerPackages));
-    console.log(colors.yellow('Npm Packages:'), String(npmPackages));
+    core.info(colors.yellow('Docker Packages: ') + String(dockerPackages));
+    core.info(colors.yellow('Npm Packages: ') + String(npmPackages));
 
+    title = colors.yellow('Last Release:');
+    if (output.releaseId) {
+      core.info(title);
+      core.info(colors.yellow('  Name: ') + output.releaseName);
+      core.info(colors.yellow('  Tag: ') + output.releaseTag);
+      core.info(colors.yellow('  Date: ') + output.releaseDate);
+    } else core.info(title + colors.red(' -'));
+
+    core.startGroup(colors.yellowBright('Packages'));
     title = colors.yellow('Packages:');
     if (output.packages.length) {
-      console.log(title);
       output.packages.forEach(p => {
-        console.log(colors.yellow('  ◉ ') + colors.green(p.name));
-        console.log(colors.yellow('    description: ') + p.description);
-        console.log(
+        core.info(colors.yellow('  ◉ ') + colors.green(p.name));
+        core.info(colors.yellow('    description: ') + p.description);
+        core.info(
           colors.yellow('    target:') +
             (p.isDockerApp ? '  ☸ Docker' : '') +
             (p.isNpmPackage ? '  📚 npm' : ''),
         );
-        console.log(colors.yellow('    version: ') + p.version);
+        core.info(colors.yellow('    version: ') + p.version);
         if (p.npmPublishedVersion)
-          console.log(
-            colors.yellow('    npm version: ') + p.npmPublishedVersion,
-          );
-        console.log(colors.yellow('    project directory: ') + p.directory);
-        console.log(colors.yellow('    build directory: ') + p.buildDir);
+          core.info(colors.yellow('    npm version: ') + p.npmPublishedVersion);
+        core.info(colors.yellow('    project directory: ') + p.directory);
+        core.info(colors.yellow('    build directory: ') + p.buildDir);
       });
-    } else console.log(title, colors.red('-'));
-
-    title = colors.yellow('Last Release:');
-    if (output.releaseId) {
-      console.log(title);
-      console.log(colors.yellow('  Name:'), output.releaseName);
-      console.log(colors.yellow('  Tag:'), output.releaseTag);
-      console.log(colors.yellow('  Date:'), output.releaseDate);
-    } else console.log(title, colors.red('-'));
-
+    } else core.info(title + colors.red(' -'));
     core.endGroup();
   }
 }
