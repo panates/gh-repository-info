@@ -14,7 +14,7 @@ export async function npmExists(packageName, options) {
   const registry = options?.registry || 'https://registry.npmjs.org';
   try {
     if (options.version) packageName += `@${options.version}`;
-    const version = execSync(
+    return execSync(
       `npm show ${packageName} version` +
         (registry ? ` --registry ${registry}` : ''),
       {
@@ -24,8 +24,6 @@ export async function npmExists(packageName, options) {
     )
       .toString()
       .trim();
-    core.debug(version);
-    return version;
   } catch (error: any) {
     const msg = error.stderr.toString();
     if (msg.includes('E404')) {

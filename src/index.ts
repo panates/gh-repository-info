@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import colors from 'ansi-colors';
+import { fetchTags } from './fetch-tags.js';
 import type { RepositoryInfo } from './interfaces/repository-info.interface.js';
 import { scanEnvironment } from './scan-environment.js';
 
@@ -38,15 +39,17 @@ async function run() {
     output.releaseDate = lastRelease.published_at || '';
   }
 
-  const tagsRequest = await octokit.rest.repos.listTags({
+  const tags = await fetchTags({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
-    per_page: 5,
+    token,
+    limit: 2,
   });
-  output.lastTag = tagsRequest.data[0]?.name;
-  output.lastTagSha = tagsRequest.data[0]?.commit?.sha || '';
-  output.prevTag = tagsRequest.data[1]?.name;
-  output.prevTagSha = tagsRequest.data[1]?.commit?.sha || '';
+
+  output.lastTag = tags[0]?.name;
+  output.lastTagSha = tags[0]?.commitSha || '';
+  output.prevTag = tags[1]?.name;
+  output.prevTagSha = tags[1]?.commitSha || '';
   const dockerPackages = output.packages.reduce(
     (acc, p) => (p.isDockerApp ? ++acc : acc),
     0,
