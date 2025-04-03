@@ -18,31 +18,37 @@ export async function processTsConfig(
   for (const file of files) {
     const fileName = path.join(rootDir, project.directory, file);
     if (!fs.existsSync(fileName)) continue;
-    /** Read tsconfig */
-    const tsConfig = await readTsConfig(fileName, rootDir);
-    const buildDir = tsConfig.compilerOptions?.outDir || './';
+    try {
+      /** Read tsconfig */
+      const tsConfig = await readTsConfig(fileName, rootDir);
+      const buildDir = tsConfig.compilerOptions?.outDir || './';
 
-    /** Find entry point */
-    let main = '';
-    const _exports = pkgJson.exports?.['.'];
-    main = pkgJson.main;
-    let x = _exports?.require || _exports?.default;
-    if (!main && x) {
-      main = typeof x === 'string' ? x : x.default;
-    }
-    if (!main) {
-      main = pkgJson.module;
-      x = _exports?.import || _exports?.default;
+      /** Find entry point */
+      let main = '';
+      const _exports = pkgJson.exports?.['.'];
+      main = pkgJson.main;
+      let x = _exports?.require || _exports?.default;
       if (!main && x) {
         main = typeof x === 'string' ? x : x.default;
       }
-    }
-    main = main || './index.js';
+      if (!main) {
+        main = pkgJson.module;
+        x = _exports?.import || _exports?.default;
+        if (!main && x) {
+          main = typeof x === 'string' ? x : x.default;
+        }
+      }
+      main = main || './index.js';
 
-    project.buildDir = path.join(
-      buildDir,
-      '.'.repeat(path.dirname(main).split('/').length),
-    );
+      project.buildDir = path.join(
+        buildDir,
+        '.'.repeat(path.dirname(main).split('/').length),
+      );
+    } catch (error: any) {
+      throw new Error(
+        `Error processing tsconfig file (${fileName}). ${error.message}`,
+      );
+    }
   }
 }
 

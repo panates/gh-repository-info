@@ -30450,24 +30450,28 @@ async function processTsConfig(project, rootDir, pkgJson) {
     const fileName = path2.join(rootDir, project.directory, file);
     if (!fs2.existsSync(fileName))
       continue;
-    const tsConfig = await readTsConfig(fileName, rootDir);
-    const buildDir = tsConfig.compilerOptions?.outDir || "./";
-    let main = "";
-    const _exports = pkgJson.exports?.["."];
-    main = pkgJson.main;
-    let x = _exports?.require || _exports?.default;
-    if (!main && x) {
-      main = typeof x === "string" ? x : x.default;
-    }
-    if (!main) {
-      main = pkgJson.module;
-      x = _exports?.import || _exports?.default;
+    try {
+      const tsConfig = await readTsConfig(fileName, rootDir);
+      const buildDir = tsConfig.compilerOptions?.outDir || "./";
+      let main = "";
+      const _exports = pkgJson.exports?.["."];
+      main = pkgJson.main;
+      let x = _exports?.require || _exports?.default;
       if (!main && x) {
         main = typeof x === "string" ? x : x.default;
       }
+      if (!main) {
+        main = pkgJson.module;
+        x = _exports?.import || _exports?.default;
+        if (!main && x) {
+          main = typeof x === "string" ? x : x.default;
+        }
+      }
+      main = main || "./index.js";
+      project.buildDir = path2.join(buildDir, ".".repeat(path2.dirname(main).split("/").length));
+    } catch (error) {
+      throw new Error(`Error processing tsconfig file (${fileName}). ${error.message}`);
     }
-    main = main || "./index.js";
-    project.buildDir = path2.join(buildDir, ".".repeat(path2.dirname(main).split("/").length));
   }
 }
 async function readTsConfig(filename, rootDir) {
