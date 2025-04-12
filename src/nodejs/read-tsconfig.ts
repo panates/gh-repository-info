@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import module from 'node:module';
 import path from 'node:path';
 import glob from 'fast-glob';
+import * as jsonc from 'jsonc-parser';
 import type { PackageInfo } from '../interfaces/repository-info.interface.js';
 
 const require = module.createRequire(import.meta.url);
@@ -58,7 +59,10 @@ async function readTsConfig(filename: string, rootDir: string) {
   }
   let contents = fs.readFileSync(filename, 'utf-8');
   contents = contents.replace(/,\s*([\]}])/g, '$1');
-  const tsConfig = JSON.parse(contents);
+  const tsConfig = jsonc.parse(contents, undefined, {
+    disallowComments: false,
+    allowTrailingComma: true,
+  });
   let extendsObj: any = {};
   if (tsConfig.extends) {
     const extendsArray = Array.isArray(tsConfig.extends)

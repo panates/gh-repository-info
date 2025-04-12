@@ -20397,7 +20397,7 @@ var require_dist_node2 = __commonJS({
         return template.replace(/\/$/, "");
       }
     }
-    function parse2(options) {
+    function parse4(options) {
       let method = options.method.toUpperCase();
       let url = (options.url || "/").replace(/:([a-z]\w+)/g, "{$1}");
       let headers = Object.assign({}, options.headers);
@@ -20461,7 +20461,7 @@ var require_dist_node2 = __commonJS({
       );
     }
     function endpointWithDefaults2(defaults, route, options) {
-      return parse2(merge2(defaults, route, options));
+      return parse4(merge2(defaults, route, options));
     }
     function withDefaults4(oldDefaults, newDefaults) {
       const DEFAULTS22 = merge2(oldDefaults, newDefaults);
@@ -20470,7 +20470,7 @@ var require_dist_node2 = __commonJS({
         DEFAULTS: DEFAULTS22,
         defaults: withDefaults4.bind(null, DEFAULTS22),
         merge: merge2.bind(null, DEFAULTS22),
-        parse: parse2
+        parse: parse4
       });
     }
     var endpoint2 = withDefaults4(null, DEFAULTS2);
@@ -23993,7 +23993,7 @@ var require_ansi_colors = __commonJS({
         while (n-- > 0) str = wrap(colors2.styles[stack[n]], str, nl);
         return str;
       };
-      const define = (name, codes, type) => {
+      const define2 = (name, codes, type) => {
         colors2.styles[name] = ansi({ name, codes });
         let keys = colors2.keys[type] || (colors2.keys[type] = []);
         keys.push(name);
@@ -24011,48 +24011,48 @@ var require_ansi_colors = __commonJS({
           }
         });
       };
-      define("reset", [0, 0], "modifier");
-      define("bold", [1, 22], "modifier");
-      define("dim", [2, 22], "modifier");
-      define("italic", [3, 23], "modifier");
-      define("underline", [4, 24], "modifier");
-      define("inverse", [7, 27], "modifier");
-      define("hidden", [8, 28], "modifier");
-      define("strikethrough", [9, 29], "modifier");
-      define("black", [30, 39], "color");
-      define("red", [31, 39], "color");
-      define("green", [32, 39], "color");
-      define("yellow", [33, 39], "color");
-      define("blue", [34, 39], "color");
-      define("magenta", [35, 39], "color");
-      define("cyan", [36, 39], "color");
-      define("white", [37, 39], "color");
-      define("gray", [90, 39], "color");
-      define("grey", [90, 39], "color");
-      define("bgBlack", [40, 49], "bg");
-      define("bgRed", [41, 49], "bg");
-      define("bgGreen", [42, 49], "bg");
-      define("bgYellow", [43, 49], "bg");
-      define("bgBlue", [44, 49], "bg");
-      define("bgMagenta", [45, 49], "bg");
-      define("bgCyan", [46, 49], "bg");
-      define("bgWhite", [47, 49], "bg");
-      define("blackBright", [90, 39], "bright");
-      define("redBright", [91, 39], "bright");
-      define("greenBright", [92, 39], "bright");
-      define("yellowBright", [93, 39], "bright");
-      define("blueBright", [94, 39], "bright");
-      define("magentaBright", [95, 39], "bright");
-      define("cyanBright", [96, 39], "bright");
-      define("whiteBright", [97, 39], "bright");
-      define("bgBlackBright", [100, 49], "bgBright");
-      define("bgRedBright", [101, 49], "bgBright");
-      define("bgGreenBright", [102, 49], "bgBright");
-      define("bgYellowBright", [103, 49], "bgBright");
-      define("bgBlueBright", [104, 49], "bgBright");
-      define("bgMagentaBright", [105, 49], "bgBright");
-      define("bgCyanBright", [106, 49], "bgBright");
-      define("bgWhiteBright", [107, 49], "bgBright");
+      define2("reset", [0, 0], "modifier");
+      define2("bold", [1, 22], "modifier");
+      define2("dim", [2, 22], "modifier");
+      define2("italic", [3, 23], "modifier");
+      define2("underline", [4, 24], "modifier");
+      define2("inverse", [7, 27], "modifier");
+      define2("hidden", [8, 28], "modifier");
+      define2("strikethrough", [9, 29], "modifier");
+      define2("black", [30, 39], "color");
+      define2("red", [31, 39], "color");
+      define2("green", [32, 39], "color");
+      define2("yellow", [33, 39], "color");
+      define2("blue", [34, 39], "color");
+      define2("magenta", [35, 39], "color");
+      define2("cyan", [36, 39], "color");
+      define2("white", [37, 39], "color");
+      define2("gray", [90, 39], "color");
+      define2("grey", [90, 39], "color");
+      define2("bgBlack", [40, 49], "bg");
+      define2("bgRed", [41, 49], "bg");
+      define2("bgGreen", [42, 49], "bg");
+      define2("bgYellow", [43, 49], "bg");
+      define2("bgBlue", [44, 49], "bg");
+      define2("bgMagenta", [45, 49], "bg");
+      define2("bgCyan", [46, 49], "bg");
+      define2("bgWhite", [47, 49], "bg");
+      define2("blackBright", [90, 39], "bright");
+      define2("redBright", [91, 39], "bright");
+      define2("greenBright", [92, 39], "bright");
+      define2("yellowBright", [93, 39], "bright");
+      define2("blueBright", [94, 39], "bright");
+      define2("magentaBright", [95, 39], "bright");
+      define2("cyanBright", [96, 39], "bright");
+      define2("whiteBright", [97, 39], "bright");
+      define2("bgBlackBright", [100, 49], "bgBright");
+      define2("bgRedBright", [101, 49], "bgBright");
+      define2("bgGreenBright", [102, 49], "bgBright");
+      define2("bgYellowBright", [103, 49], "bgBright");
+      define2("bgBlueBright", [104, 49], "bgBright");
+      define2("bgMagentaBright", [105, 49], "bgBright");
+      define2("bgCyanBright", [106, 49], "bgBright");
+      define2("bgWhiteBright", [107, 49], "bgBright");
       colors2.ansiRegex = ANSI_REGEX;
       colors2.hasColor = colors2.hasAnsi = (str) => {
         colors2.ansiRegex.lastIndex = 0;
@@ -24100,7 +24100,7 @@ var require_ansi_colors = __commonJS({
       colors2.none = colors2.clear = colors2.noop;
       colors2.stripColor = colors2.unstyle;
       colors2.symbols = require_symbols6();
-      colors2.define = define;
+      colors2.define = define2;
       return colors2;
     };
     module2.exports = create();
@@ -24121,7 +24121,7 @@ var require_fast_content_type_parse = __commonJS({
     var defaultContentType = { type: "", parameters: new NullObject() };
     Object.freeze(defaultContentType.parameters);
     Object.freeze(defaultContentType);
-    function parse2(header) {
+    function parse4(header) {
       if (typeof header !== "string") {
         throw new TypeError("argument header is required and must be a string");
       }
@@ -24197,8 +24197,8 @@ var require_fast_content_type_parse = __commonJS({
       }
       return result;
     }
-    module2.exports.default = { parse: parse2, safeParse: safeParse2 };
-    module2.exports.parse = parse2;
+    module2.exports.default = { parse: parse4, safeParse: safeParse2 };
+    module2.exports.parse = parse4;
     module2.exports.safeParse = safeParse2;
     module2.exports.defaultContentType = defaultContentType;
   }
@@ -25314,7 +25314,7 @@ var require_parse2 = __commonJS({
       CHAR_NO_BREAK_SPACE,
       CHAR_ZERO_WIDTH_NOBREAK_SPACE
     } = require_constants6();
-    var parse2 = (input, options = {}) => {
+    var parse4 = (input, options = {}) => {
       if (typeof input !== "string") {
         throw new TypeError("Expected a string");
       }
@@ -25514,7 +25514,7 @@ var require_parse2 = __commonJS({
       push({ type: "eos" });
       return ast;
     };
-    module2.exports = parse2;
+    module2.exports = parse4;
   }
 });
 
@@ -25525,7 +25525,7 @@ var require_braces = __commonJS({
     var stringify = require_stringify();
     var compile = require_compile();
     var expand2 = require_expand();
-    var parse2 = require_parse2();
+    var parse4 = require_parse2();
     var braces = (input, options = {}) => {
       let output = [];
       if (Array.isArray(input)) {
@@ -25545,7 +25545,7 @@ var require_braces = __commonJS({
       }
       return output;
     };
-    braces.parse = (input, options = {}) => parse2(input, options);
+    braces.parse = (input, options = {}) => parse4(input, options);
     braces.stringify = (input, options = {}) => {
       if (typeof input === "string") {
         return stringify(braces.parse(input, options), options);
@@ -26198,7 +26198,7 @@ var require_parse3 = __commonJS({
     var syntaxError = (type, char) => {
       return `Missing ${type}: "${char}" - use "\\\\${char}" to match literal characters`;
     };
-    var parse2 = (input, options) => {
+    var parse4 = (input, options) => {
       if (typeof input !== "string") {
         throw new TypeError("Expected a string");
       }
@@ -26347,7 +26347,7 @@ var require_parse3 = __commonJS({
             output = token.close = `)$))${extglobStar}`;
           }
           if (token.inner.includes("*") && (rest = remaining()) && /^\.[^\\/.]+$/.test(rest)) {
-            const expression = parse2(rest, { ...options, fastpaths: false }).output;
+            const expression = parse4(rest, { ...options, fastpaths: false }).output;
             output = token.close = `)${expression})${extglobStar})`;
           }
           if (token.prev.type === "bos") {
@@ -26872,7 +26872,7 @@ var require_parse3 = __commonJS({
       }
       return state;
     };
-    parse2.fastpaths = (input, options) => {
+    parse4.fastpaths = (input, options) => {
       const opts = { ...options };
       const max = typeof opts.maxLength === "number" ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
       const len = input.length;
@@ -26938,7 +26938,7 @@ var require_parse3 = __commonJS({
       }
       return source;
     };
-    module2.exports = parse2;
+    module2.exports = parse4;
   }
 });
 
@@ -26948,7 +26948,7 @@ var require_picomatch = __commonJS({
     "use strict";
     var path4 = __require("path");
     var scan = require_scan();
-    var parse2 = require_parse3();
+    var parse4 = require_parse3();
     var utils = require_utils6();
     var constants = require_constants7();
     var isObject = (val) => val && typeof val === "object" && !Array.isArray(val);
@@ -27036,7 +27036,7 @@ var require_picomatch = __commonJS({
     picomatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
     picomatch.parse = (pattern, options) => {
       if (Array.isArray(pattern)) return pattern.map((p) => picomatch.parse(p, options));
-      return parse2(pattern, { ...options, fastpaths: false });
+      return parse4(pattern, { ...options, fastpaths: false });
     };
     picomatch.scan = (input, options) => scan(input, options);
     picomatch.compileRe = (state, options, returnOutput = false, returnState = false) => {
@@ -27062,10 +27062,10 @@ var require_picomatch = __commonJS({
       }
       let parsed = { negated: false, fastpaths: true };
       if (options.fastpaths !== false && (input[0] === "." || input[0] === "*")) {
-        parsed.output = parse2.fastpaths(input, options);
+        parsed.output = parse4.fastpaths(input, options);
       }
       if (!parsed.output) {
-        parsed = parse2(input, options);
+        parsed = parse4(input, options);
       }
       return picomatch.compileRe(parsed, options, returnOutput, returnState);
     };
@@ -29693,6 +29693,154 @@ var require_out4 = __commonJS({
   }
 });
 
+// node_modules/jsonc-parser/lib/umd/main.js
+var require_main2 = __commonJS({
+  "node_modules/jsonc-parser/lib/umd/main.js"(exports, module2) {
+    (function(factory) {
+      if (typeof module2 === "object" && typeof module2.exports === "object") {
+        var v = factory(__require, exports);
+        if (v !== void 0) module2.exports = v;
+      } else if (typeof define === "function" && define.amd) {
+        define(["require", "exports", "./impl/format", "./impl/edit", "./impl/scanner", "./impl/parser"], factory);
+      }
+    })(function(require3, exports2) {
+      "use strict";
+      Object.defineProperty(exports2, "__esModule", { value: true });
+      exports2.applyEdits = exports2.modify = exports2.format = exports2.printParseErrorCode = exports2.ParseErrorCode = exports2.stripComments = exports2.visit = exports2.getNodeValue = exports2.getNodePath = exports2.findNodeAtOffset = exports2.findNodeAtLocation = exports2.parseTree = exports2.parse = exports2.getLocation = exports2.SyntaxKind = exports2.ScanError = exports2.createScanner = void 0;
+      const formatter = require3("./impl/format");
+      const edit = require3("./impl/edit");
+      const scanner = require3("./impl/scanner");
+      const parser = require3("./impl/parser");
+      exports2.createScanner = scanner.createScanner;
+      var ScanError;
+      (function(ScanError2) {
+        ScanError2[ScanError2["None"] = 0] = "None";
+        ScanError2[ScanError2["UnexpectedEndOfComment"] = 1] = "UnexpectedEndOfComment";
+        ScanError2[ScanError2["UnexpectedEndOfString"] = 2] = "UnexpectedEndOfString";
+        ScanError2[ScanError2["UnexpectedEndOfNumber"] = 3] = "UnexpectedEndOfNumber";
+        ScanError2[ScanError2["InvalidUnicode"] = 4] = "InvalidUnicode";
+        ScanError2[ScanError2["InvalidEscapeCharacter"] = 5] = "InvalidEscapeCharacter";
+        ScanError2[ScanError2["InvalidCharacter"] = 6] = "InvalidCharacter";
+      })(ScanError || (exports2.ScanError = ScanError = {}));
+      var SyntaxKind;
+      (function(SyntaxKind2) {
+        SyntaxKind2[SyntaxKind2["OpenBraceToken"] = 1] = "OpenBraceToken";
+        SyntaxKind2[SyntaxKind2["CloseBraceToken"] = 2] = "CloseBraceToken";
+        SyntaxKind2[SyntaxKind2["OpenBracketToken"] = 3] = "OpenBracketToken";
+        SyntaxKind2[SyntaxKind2["CloseBracketToken"] = 4] = "CloseBracketToken";
+        SyntaxKind2[SyntaxKind2["CommaToken"] = 5] = "CommaToken";
+        SyntaxKind2[SyntaxKind2["ColonToken"] = 6] = "ColonToken";
+        SyntaxKind2[SyntaxKind2["NullKeyword"] = 7] = "NullKeyword";
+        SyntaxKind2[SyntaxKind2["TrueKeyword"] = 8] = "TrueKeyword";
+        SyntaxKind2[SyntaxKind2["FalseKeyword"] = 9] = "FalseKeyword";
+        SyntaxKind2[SyntaxKind2["StringLiteral"] = 10] = "StringLiteral";
+        SyntaxKind2[SyntaxKind2["NumericLiteral"] = 11] = "NumericLiteral";
+        SyntaxKind2[SyntaxKind2["LineCommentTrivia"] = 12] = "LineCommentTrivia";
+        SyntaxKind2[SyntaxKind2["BlockCommentTrivia"] = 13] = "BlockCommentTrivia";
+        SyntaxKind2[SyntaxKind2["LineBreakTrivia"] = 14] = "LineBreakTrivia";
+        SyntaxKind2[SyntaxKind2["Trivia"] = 15] = "Trivia";
+        SyntaxKind2[SyntaxKind2["Unknown"] = 16] = "Unknown";
+        SyntaxKind2[SyntaxKind2["EOF"] = 17] = "EOF";
+      })(SyntaxKind || (exports2.SyntaxKind = SyntaxKind = {}));
+      exports2.getLocation = parser.getLocation;
+      exports2.parse = parser.parse;
+      exports2.parseTree = parser.parseTree;
+      exports2.findNodeAtLocation = parser.findNodeAtLocation;
+      exports2.findNodeAtOffset = parser.findNodeAtOffset;
+      exports2.getNodePath = parser.getNodePath;
+      exports2.getNodeValue = parser.getNodeValue;
+      exports2.visit = parser.visit;
+      exports2.stripComments = parser.stripComments;
+      var ParseErrorCode;
+      (function(ParseErrorCode2) {
+        ParseErrorCode2[ParseErrorCode2["InvalidSymbol"] = 1] = "InvalidSymbol";
+        ParseErrorCode2[ParseErrorCode2["InvalidNumberFormat"] = 2] = "InvalidNumberFormat";
+        ParseErrorCode2[ParseErrorCode2["PropertyNameExpected"] = 3] = "PropertyNameExpected";
+        ParseErrorCode2[ParseErrorCode2["ValueExpected"] = 4] = "ValueExpected";
+        ParseErrorCode2[ParseErrorCode2["ColonExpected"] = 5] = "ColonExpected";
+        ParseErrorCode2[ParseErrorCode2["CommaExpected"] = 6] = "CommaExpected";
+        ParseErrorCode2[ParseErrorCode2["CloseBraceExpected"] = 7] = "CloseBraceExpected";
+        ParseErrorCode2[ParseErrorCode2["CloseBracketExpected"] = 8] = "CloseBracketExpected";
+        ParseErrorCode2[ParseErrorCode2["EndOfFileExpected"] = 9] = "EndOfFileExpected";
+        ParseErrorCode2[ParseErrorCode2["InvalidCommentToken"] = 10] = "InvalidCommentToken";
+        ParseErrorCode2[ParseErrorCode2["UnexpectedEndOfComment"] = 11] = "UnexpectedEndOfComment";
+        ParseErrorCode2[ParseErrorCode2["UnexpectedEndOfString"] = 12] = "UnexpectedEndOfString";
+        ParseErrorCode2[ParseErrorCode2["UnexpectedEndOfNumber"] = 13] = "UnexpectedEndOfNumber";
+        ParseErrorCode2[ParseErrorCode2["InvalidUnicode"] = 14] = "InvalidUnicode";
+        ParseErrorCode2[ParseErrorCode2["InvalidEscapeCharacter"] = 15] = "InvalidEscapeCharacter";
+        ParseErrorCode2[ParseErrorCode2["InvalidCharacter"] = 16] = "InvalidCharacter";
+      })(ParseErrorCode || (exports2.ParseErrorCode = ParseErrorCode = {}));
+      function printParseErrorCode(code) {
+        switch (code) {
+          case 1:
+            return "InvalidSymbol";
+          case 2:
+            return "InvalidNumberFormat";
+          case 3:
+            return "PropertyNameExpected";
+          case 4:
+            return "ValueExpected";
+          case 5:
+            return "ColonExpected";
+          case 6:
+            return "CommaExpected";
+          case 7:
+            return "CloseBraceExpected";
+          case 8:
+            return "CloseBracketExpected";
+          case 9:
+            return "EndOfFileExpected";
+          case 10:
+            return "InvalidCommentToken";
+          case 11:
+            return "UnexpectedEndOfComment";
+          case 12:
+            return "UnexpectedEndOfString";
+          case 13:
+            return "UnexpectedEndOfNumber";
+          case 14:
+            return "InvalidUnicode";
+          case 15:
+            return "InvalidEscapeCharacter";
+          case 16:
+            return "InvalidCharacter";
+        }
+        return "<unknown ParseErrorCode>";
+      }
+      exports2.printParseErrorCode = printParseErrorCode;
+      function format(documentText, range, options) {
+        return formatter.format(documentText, range, options);
+      }
+      exports2.format = format;
+      function modify(text, path4, value, options) {
+        return edit.setProperty(text, path4, value, options);
+      }
+      exports2.modify = modify;
+      function applyEdits(text, edits) {
+        let sortedEdits = edits.slice(0).sort((a, b) => {
+          const diff = a.offset - b.offset;
+          if (diff === 0) {
+            return a.length - b.length;
+          }
+          return diff;
+        });
+        let lastModifiedOffset = text.length;
+        for (let i = sortedEdits.length - 1; i >= 0; i--) {
+          let e = sortedEdits[i];
+          if (e.offset + e.length <= lastModifiedOffset) {
+            text = edit.applyEdit(text, e);
+          } else {
+            throw new Error("Overlapping edit");
+          }
+          lastModifiedOffset = e.offset;
+        }
+        return text;
+      }
+      exports2.applyEdits = applyEdits;
+    });
+  }
+});
+
 // build/index.js
 var core2 = __toESM(require_core(), 1);
 var github = __toESM(require_github(), 1);
@@ -30390,6 +30538,7 @@ query($owner: String!, $repo: String!, $first: Int!) {
 
 // build/nodejs/scan-nodejs-environment.js
 var import_fast_glob2 = __toESM(require_out4(), 1);
+var jsonc2 = __toESM(require_main2(), 1);
 import fs3 from "node:fs";
 import path3 from "node:path";
 
@@ -30436,6 +30585,7 @@ function setNpmrcValue(key, value, cwd) {
 
 // build/nodejs/read-tsconfig.js
 var import_fast_glob = __toESM(require_out4(), 1);
+var jsonc = __toESM(require_main2(), 1);
 import fs2 from "node:fs";
 import module from "node:module";
 import path2 from "node:path";
@@ -30480,7 +30630,10 @@ async function readTsConfig(filename, rootDir) {
   }
   let contents = fs2.readFileSync(filename, "utf-8");
   contents = contents.replace(/,\s*([\]}])/g, "$1");
-  const tsConfig = JSON.parse(contents);
+  const tsConfig = jsonc.parse(contents, void 0, {
+    disallowComments: false,
+    allowTrailingComma: true
+  });
   let extendsObj = {};
   if (tsConfig.extends) {
     const extendsArray = Array.isArray(tsConfig.extends) ? tsConfig.extends : [tsConfig.extends];
@@ -30516,7 +30669,10 @@ async function scanNodeJSEnvironment(args) {
   const fileName = path3.join(args.rootDir, "package.json");
   if (!fs3.existsSync(fileName))
     return;
-  const rootJson = JSON.parse(fs3.readFileSync(fileName, "utf-8"));
+  const rootJson = jsonc2.parse(fs3.readFileSync(fileName, "utf-8"), void 0, {
+    disallowComments: false,
+    allowTrailingComma: true
+  });
   if (rootJson.workspaces) {
     output.monorepo = true;
     const dirs = import_fast_glob2.default.sync(rootJson.workspaces, {
@@ -30546,7 +30702,10 @@ async function scanProject(args) {
   let fileName = path3.join(packageDir, "package.json");
   if (!fs3.existsSync(fileName))
     return;
-  const pkgJson = JSON.parse(fs3.readFileSync(fileName, "utf-8"));
+  const pkgJson = jsonc2.parse(fs3.readFileSync(fileName, "utf-8"), void 0, {
+    disallowComments: false,
+    allowTrailingComma: true
+  });
   const dockerFileExists = fs3.existsSync(path3.join(packageDir, "Dockerfile"));
   const project = {
     name: pkgJson.name,

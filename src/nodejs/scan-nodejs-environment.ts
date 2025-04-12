@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import glob from 'fast-glob';
+import * as jsonc from 'jsonc-parser';
 import {
   PackageInfo,
   RepositoryInfo,
@@ -20,7 +21,10 @@ export async function scanNodeJSEnvironment(args: {
   };
   const fileName = path.join(args.rootDir, 'package.json');
   if (!fs.existsSync(fileName)) return;
-  const rootJson = JSON.parse(fs.readFileSync(fileName, 'utf-8'));
+  const rootJson = jsonc.parse(fs.readFileSync(fileName, 'utf-8'), undefined, {
+    disallowComments: false,
+    allowTrailingComma: true,
+  });
   if (rootJson.workspaces) {
     output.monorepo = true;
     const dirs = glob.sync(rootJson.workspaces, {
@@ -53,7 +57,10 @@ async function scanProject(args: {
   /** Check package.json */
   let fileName = path.join(packageDir, 'package.json');
   if (!fs.existsSync(fileName)) return;
-  const pkgJson = JSON.parse(fs.readFileSync(fileName, 'utf-8'));
+  const pkgJson = jsonc.parse(fs.readFileSync(fileName, 'utf-8'), undefined, {
+    disallowComments: false,
+    allowTrailingComma: true,
+  });
   const dockerFileExists = fs.existsSync(path.join(packageDir, 'Dockerfile'));
   const project: PackageInfo = {
     name: pkgJson.name,
