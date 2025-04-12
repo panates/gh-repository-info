@@ -12,5 +12,6 @@ esbuild
     banner: {
       js: "import { createRequire } from 'module'; const require = createRequire(import.meta.url);",
     },
+    mainFields: ['module', 'main'],
   })
   .catch(() => process.exit(1));

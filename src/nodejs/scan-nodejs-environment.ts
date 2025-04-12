@@ -31,13 +31,15 @@ export async function scanNodeJSEnvironment(args: {
       cwd: args.rootDir,
       onlyDirectories: true,
     });
-    for (const dir of dirs) {
-      const project = await scanProject({
-        ...args,
-        dir,
-      });
-      if (project) output.packages.push(project);
-    }
+    await Promise.all(
+      dirs.map(async dir => {
+        const project = await scanProject({
+          ...args,
+          dir,
+        });
+        if (project) output.packages.push(project);
+      }),
+    );
   } else {
     const project = await scanProject({
       ...args,
