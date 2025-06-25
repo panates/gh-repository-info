@@ -31361,8 +31361,8 @@ async function readTsConfig(filename, rootDir) {
       extendsObj = {
         ...o,
         compilerOptions: {
-          ...extendsObj.compilerOptions,
-          ...o.compilerOptions
+          ...extendsObj?.compilerOptions,
+          ...o?.compilerOptions
         }
       };
     }
@@ -31370,8 +31370,8 @@ async function readTsConfig(filename, rootDir) {
   return {
     ...extendsObj,
     compilerOptions: {
-      ...extendsObj.compilerOptions,
-      ...tsConfig.compilerOptions
+      ...extendsObj?.compilerOptions,
+      ...tsConfig?.compilerOptions
     }
   };
 }
