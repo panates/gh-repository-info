@@ -7,7 +7,7 @@ import type { PackageInfo } from '../interfaces/repository-info.interface.js';
 
 const require = module.createRequire(import.meta.url);
 
-export async function processTsConfig(
+export function processTsConfig(
   project: PackageInfo,
   rootDir: string,
   pkgJson: any,
@@ -16,44 +16,43 @@ export async function processTsConfig(
     cwd: path.join(rootDir, project.directory),
   });
   if (!files.length) files.push('tsconfig.json');
-  for (const file of files) {
-    const fileName = path.join(rootDir, project.directory, file);
-    if (!fs.existsSync(fileName)) continue;
-    try {
-      /** Read tsconfig */
-      const tsConfig = await readTsConfig(fileName, rootDir);
-      const buildDir = tsConfig.compilerOptions?.outDir || './';
+  const file = files[0];
+  if (!file) return;
+  const fileName = path.join(rootDir, project.directory, file);
+  if (!fs.existsSync(fileName)) return;
+  try {
+    /** Read tsconfig */
+    const tsConfig = readTsConfig(fileName, rootDir);
+    const buildDir = tsConfig.compilerOptions?.outDir || './';
 
-      /** Find entry point */
-      let main = '';
-      const _exports = pkgJson.exports?.['.'];
-      main = pkgJson.main;
-      let x = _exports?.require || _exports?.default;
+    /** Find an entry point */
+    const _exports = pkgJson.exports?.['.'];
+    let main = pkgJson.main;
+    let x = _exports?.require || _exports?.default;
+    if (!main && x) {
+      main = typeof x === 'string' ? x : x.default;
+    }
+    if (!main) {
+      main = pkgJson.module;
+      x = _exports?.import || _exports?.default;
       if (!main && x) {
         main = typeof x === 'string' ? x : x.default;
       }
-      if (!main) {
-        main = pkgJson.module;
-        x = _exports?.import || _exports?.default;
-        if (!main && x) {
-          main = typeof x === 'string' ? x : x.default;
-        }
-      }
-      main = main || './index.js';
-
-      project.buildDir = path.join(
-        buildDir,
-        '.'.repeat(path.dirname(main).split('/').length),
-      );
-    } catch (error: any) {
-      throw new Error(
-        `Error processing tsconfig file (${fileName}). ${error.message}`,
-      );
     }
+    main = main || './index.js';
+
+    project.buildDir = path.join(
+      buildDir,
+      '.'.repeat(path.dirname(main).split('/').length),
+    );
+  } catch (error: any) {
+    throw new Error(
+      `Error processing tsconfig file (${fileName}). ${error.message}`,
+    );
   }
 }
 
-async function readTsConfig(filename: string, rootDir: string) {
+function readTsConfig(filename: string, rootDir: string) {
   if (!(filename.startsWith('.') || filename.startsWith('/'))) {
     filename = require.resolve(filename, { paths: [rootDir] });
   }
@@ -70,7 +69,7 @@ async function readTsConfig(filename: string, rootDir: string) {
       : [tsConfig.extends];
     for (let f of extendsArray) {
       if (f.startsWith('.')) f = path.resolve(path.dirname(filename), f);
-      const o = await readTsConfig(f, rootDir);
+      const o = readTsConfig(f, rootDir);
       extendsObj = {
         ...o,
         compilerOptions: {

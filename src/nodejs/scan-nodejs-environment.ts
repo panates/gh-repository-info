@@ -82,7 +82,7 @@ async function scanProject(args: {
   /** Check if is a TypeScript project */
   fileName = path.join(packageDir, 'tsconfig.json');
   if (fs.existsSync(fileName)) {
-    await processTsConfig(project, args.rootDir, pkgJson);
+    processTsConfig(project, args.rootDir, pkgJson);
   }
 
   /** Check published version from npm repository */
