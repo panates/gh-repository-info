@@ -23,31 +23,34 @@ export function processTsConfig(
   try {
     /** Read tsconfig */
     const tsConfig = readTsConfig(fileName, rootDir);
-    const buildDir = tsConfig.compilerOptions?.outDir || './';
+    if (tsConfig.compilerOptions?.outDir) {
+      const buildDir = tsConfig.compilerOptions.outDir;
 
-    /** Find an entry point */
-    const _exports = pkgJson.exports?.['.'];
-    let main = pkgJson.main;
-    let x = _exports?.require || _exports?.default;
-    if (!main && x) {
-      main = typeof x === 'string' ? x : x.default;
-    }
-    if (!main) {
-      main = pkgJson.module;
-      x = _exports?.import || _exports?.default;
+      /** Find an entry point */
+      const _exports = pkgJson.exports?.['.'];
+      let main = pkgJson.main;
+      let x = _exports?.require || _exports?.default;
       if (!main && x) {
         main = typeof x === 'string' ? x : x.default;
       }
-    }
-    main = main || './index.js';
-
-    project.buildDir = path.join(
-      buildDir,
-      '.'.repeat(path.dirname(main).split('/').length),
-    );
+      if (!main) {
+        main = pkgJson.module;
+        x = _exports?.import || _exports?.default;
+        if (!main && x) {
+          main = typeof x === 'string' ? x : x.default;
+        }
+      }
+      main = main || './index.js';
+      project.buildDir = path.join(
+        buildDir,
+        '.'.repeat(path.dirname(main).split('/').length),
+      );
+    } else project.buildDir = '.';
   } catch (error: any) {
     throw new Error(
       `Error processing tsconfig file (${fileName}). ${error.message}`,
+      // @ts-ignore
+      { cause: error },
     );
   }
 }

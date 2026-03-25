@@ -30,6 +30,10 @@ export async function npmExists(packageName, options) {
       core.debug(msg);
       return;
     }
-    throw new Error(msg);
+    throw new Error(
+      msg,
+      // @ts-ignore
+      { cause: error },
+    );
   }
 }

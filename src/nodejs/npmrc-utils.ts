@@ -17,6 +17,6 @@ export function setNpmrcValue(key, value, cwd?: string) {
       return line;
     })
     .join('\n');
-  if (!i) npmrcContent = npmrcContent += '\n' + key + '=' + value;
+  if (!i) npmrcContent += '\n' + key + '=' + value;
   fs.writeFileSync(npmrcPath, npmrcContent.trim());
 }

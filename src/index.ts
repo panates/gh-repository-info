@@ -51,10 +51,12 @@ async function run() {
   output.prevTag = tags[1]?.name;
   output.prevTagSha = tags[1]?.commitSha || '';
   const dockerPackages = output.packages.reduce(
+    // eslint-disable-next-line no-useless-assignment
     (acc, p) => (p.isDockerApp ? ++acc : acc),
     0,
   );
   const npmPackages = output.packages.reduce(
+    // eslint-disable-next-line no-useless-assignment
     (acc, p) => (p.isNpmPackage ? ++acc : acc),
     0,
   );
