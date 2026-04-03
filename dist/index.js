@@ -30760,7 +30760,7 @@ async function scanProject(args) {
     version: pkgJson.version,
     description: pkgJson.description,
     directory: args.dir,
-    buildDir: "./"
+    buildDir: pkgJson.buildDir || "./"
   };
   if (!pkgJson.private || pkgJson.publishConfig || dockerFileExists) {
     if (dockerFileExists) {
@@ -30773,12 +30773,6 @@ async function scanProject(args) {
   fileName = path3.join(packageDir, "tsconfig.json");
   if (fs5.existsSync(fileName)) {
     processTsConfig(project, args.rootDir, pkgJson);
-  } else {
-    if (fs5.existsSync(path3.join(project.directory, "build/package.json"))) {
-      project.buildDir = "./build";
-    } else if (fs5.existsSync(path3.join(project.directory, "dist/package.json"))) {
-      project.buildDir = "./dist";
-    }
   }
   if (project.isNpmPackage) {
     setNpmrcValue("//npm.pkg.github.com/:_authToken", args.token, packageDir);
