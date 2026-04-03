@@ -83,6 +83,15 @@ async function scanProject(args: {
   fileName = path.join(packageDir, 'tsconfig.json');
   if (fs.existsSync(fileName)) {
     processTsConfig(project, args.rootDir, pkgJson);
+  } else {
+    /** Lookup for build directory for regular js projects */
+    if (fs.existsSync(path.join(project.directory, 'build/package.json'))) {
+      project.buildDir = './build';
+    } else if (
+      fs.existsSync(path.join(project.directory, 'dist/package.json'))
+    ) {
+      project.buildDir = './dist';
+    }
   }
 
   /** Check published version from npm repository */

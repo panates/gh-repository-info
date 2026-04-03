@@ -29,7 +29,7 @@ outputs:
     description: Info object for last released version
 
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/index.js'
 branding:
   color: yellow

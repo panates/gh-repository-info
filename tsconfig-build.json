@@ -1,11 +1,9 @@
 {
   "extends": ["./tsconfig-base.json", "@panates/tsconfig/build.json"],
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "node",
     "declaration": false,
     "outDir": "build",
+    "rootDir": "src",
     "sourceMap": true
   },
   "include": ["src"]
